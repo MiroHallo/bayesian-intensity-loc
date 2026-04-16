@@ -82,9 +82,9 @@ INPUT = ConfigClass(
     h_top=3.0,      # [km] Top depth of the rupture
 
     # Grid search definitions: (start, step, end)
-    grid_x_set=[-25.0, 0.05, 25.0],  # [km] Easting grid
-    grid_y_set=[-25.0, 0.05, 25.0],  # [km] Northing grid
-    grid_z_set=[6.0, 0.005, 7.0],    # [-]  Moment magnitude grid
+    grid_x_set=[-25.0, 0.1, 25.0],  # [km] Easting grid
+    grid_y_set=[-25.0, 0.1, 25.0],  # [km] Northing grid
+    grid_z_set=[6.0, 0.01, 7.0],    # [-]  Moment magnitude grid
 
     # Path to the ASCII (UTF-8) text file containing input data
     input_file='INPUT.txt',
