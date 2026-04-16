@@ -1,5 +1,5 @@
 # High-Performance Bayesian earthquake location from seismic intensity
-A JAX-accelerated Python framework for seismic source inversion and uncertainty quantification using JMA intensity data in Japan.
+A JAX-accelerated Python framework for seismic source inversion and uncertainty quantification using JMA intensity.
 ***************************************
 
 This tool is a high-performance Python framework designed for Bayesian inversion of 
