@@ -8,16 +8,14 @@ the Japanese JMA instrumental seismic intensity (Shindo) scale. Following the
 probabilistic inverse theory of Tarantola (2005), it fully accounts for uncertainties 
 in both the measured data (seismic intensity) and the theoretical model (ground motion 
 prediction equation, GMPE). The system evaluates the posterior Probability Density 
-Function (PDF) for the epicenter location and magnitude via an exhaustive 3D grid 
-search, ensuring no local minima are missed. By leveraging JAX for massive parallelization, 
+Function (PDF) for the epicenter location and magnitude via an exhaustive 3D grid search,
+ensuring no local minima are missed. By leveraging JAX for massive parallelization, modern 
 it allows for near-instantaneous evaluation on both CPU and GPU, making it ideal for both 
-modern real-time seismology and the processing of large-scale historical earthquake catalogs.
-
-**Key Features:**
-* **HPC Ready:** Fully vectorized backend using JAX (XLA) with seamless support for GPU/TPU acceleration.
+real-time seismology and the processing of large-scale historical earthquake catalogs. Key Features:
+* **HPC Ready:** Fully vectorized backend using JAX (XLA) with seamless support for CPU/GPU/TPU acceleration.
 * **Bayesian Framework:** Complete 3D PDF evaluation accounting for both observational uncertainties and modeling errors.
 * **Scientific GMPE:** Implements the Morikawa & Fujiwara (2013) Ground Motion Prediction Equation for forward computation.
-* **Automatic Site Effects:** Integrated workflow for automated V<sub>S30</sub> retrieval from a high-resolution J-SHIS-derived SQL database for Japan (for sites without V<sub>S30</sub> measurements).
+* **Automatic Site Effects:** Integrated workflow for automated V<sub>S30</sub> retrieval from a high-resolution J-SHIS-derived SQL database for Japan (for sites in Japan without direct V<sub>S30</sub> measurements).
 * **Historical & Modern Data:** Support for both recent instrumental records and macroseismic (historical) observations.
 * **User-Friendly:** Simple ASCII input/output, PEP8 compliant, and structured for researchers and Python-beginners.
 
@@ -25,17 +23,21 @@ modern real-time seismology and the processing of large-scale historical earthqu
 ===================
 
 The inversion follows the probabilistic inverse theory and total error budget 
-accounting for both observational and theoretical uncertainties as described in:
+accounting for both observational and theoretical uncertainties as described in Tarantola (2005).
+The JMA intensity prediction is following Morikawa and Fujiwara (2013).
 
   Tarantola, A. (2005, Chapter 7.1). Inverse Problem Theory and Methods 
 for Model Parameter Estimation, Society for Industrial and Applied 
 Mathematics, Philadelphia, USA.
 
+  Morikawa, N., Fujiwara, H. (2013). A New Ground Motion Prediction Equation
+for Japan Applicable up to M9 Mega-Earthquake, J. Disaster Res., 8(5), 878-888. [https://doi.org/10.20965/jdr.2013.p0878](https://doi.org/10.20965/jdr.2013.p0878)
+
 2 DATABASE (SQLite)
 ===================
 
 If missing V<sub>S30</sub> values are detected, the system automatically interfaces with an
-optimized SQLite subset of the J-SHIS-derived database for Japan:
+optimized SQLite subset of the J-SHIS-derived database for Japan (Hallo, 2026):
 
   Hallo, M. (2026). Research Dataset: Optimized Site Parameters (Vs30) 
 for Seismic Hazard Analysis in Japan (derived from J-SHIS) [Data set]. 
@@ -48,7 +50,7 @@ Zenodo. [https://doi.org/10.5281/zenodo.19379171](https://doi.org/10.5281/zenodo
 
 The computational engine is engineered for maximum throughput by bypassing standard Python execution loops in favor of **XLA (Accelerated Linear Algebra)**:
 
-* **JIT Compilation:** Every critical path—from the Forward GMPE evaluation to the Likelihood summation—is Just-In-Time (JIT) compiled. This transforms Python code into optimized machine code tailored for the specific hardware (CPU or GPU).
+* **JIT Compilation:** Every critical path, from the Forward GMPE evaluation to the Likelihood summation, is Just-In-Time (JIT) compiled. This transforms Python code into optimized machine code tailored for the specific hardware (CPU or GPU).
 * **Multi-Device Scaling:** Leveraging JAX allows the 3D grid-search to be offloaded to GPU/TPU without code changes. On multi-core CPUs, it utilizes all available threads via vectorized operations rather than standard multiprocessing.
 * **Vectorized Grid Search:** Instead of iterative loops, the framework uses nested vectorization (`vmap`). The 3D parameter space is treated as a high-dimensional tensor, allowing the hardware to evaluate thousands of potential epicenters and magnitudes in a single clock cycle.
 * **SQLite Spatial Indexing:** Automatic retrieval is powered by a high-performance SQLite backend. This allows for rapid spatial lookups within a processed database, ensuring that even datasets with missing site data are enriched with industry-standard values.
@@ -131,7 +133,7 @@ The computation process is monitored, and the tool informs the user in real-time
 [*] SUCCESS: All done
 ```
 
-Regarding the results, the figure below illustrates the output 3D posterior Probability Density Function (PDF) with orthogonal slices (Mw, N-S, E-W) passing through the Maximum Likelihood (ML) location.
+Regarding the results, the figure below illustrates the output 3D posterior Probability Density Function (PDF) with orthogonal slices (M<sub>w</sub>, N-S, E-W) passing through the Maximum Likelihood (ML) solution.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="img/int_dark.png">
