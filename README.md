@@ -59,7 +59,9 @@ The computational engine is engineered for maximum throughput by bypassing stand
 
 The official software version is archived on Zenodo:
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1934303.svg)](https://doi.org/10.5281/zenodo.1934303)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19603409.svg)](https://doi.org/10.5281/zenodo.19603409)
+
+Cite as: Hallo, M. (2026). JAX-accelerated Bayesian earthquake location from JMA seismic intensity (v1.0). Zenodo. https://doi.org/10.5281/zenodo.19603409
 
 4 PACKAGE CONTENT
 ===================
