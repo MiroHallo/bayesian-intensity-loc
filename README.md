@@ -1,6 +1,8 @@
 # High-Performance Bayesian earthquake location from seismic intensity
+
 A JAX-accelerated Python framework for seismic source inversion and uncertainty quantification using JMA intensity.
-***************************************
+
+---
 
 This tool is a high-performance Python framework designed for Bayesian inversion of 
 earthquake epicenters and moment magnitudes (M<sub>w</sub>) specifically tailored for 
@@ -9,9 +11,9 @@ probabilistic inverse theory of Tarantola (2005), it fully accounts for uncertai
 in both the measured data (seismic intensity) and the theoretical model (ground motion 
 prediction equation, GMPE). The system evaluates the posterior Probability Density 
 Function (PDF) for the epicenter location and magnitude via an exhaustive 3D grid search,
-ensuring no local minima are missed. By leveraging JAX for massive parallelization, modern 
-it allows for near-instantaneous evaluation on both CPU and GPU, making it ideal for both 
-real-time seismology and the processing of large-scale historical earthquake catalogs. Key Features:
+ensuring no local minima are missed. By leveraging JAX for massive parallelization, it 
+allows for near-instantaneous evaluation on both CPU and GPU, making it ideal for both 
+real-time modern seismology and the processing of historical earthquakes. Key Features:
 * **HPC Ready:** Fully vectorized backend using JAX (XLA) with seamless support for CPU/GPU/TPU acceleration.
 * **Bayesian Framework:** Complete 3D PDF evaluation accounting for both observational uncertainties and modeling errors.
 * **Scientific GMPE:** Implements the Morikawa & Fujiwara (2013) Ground Motion Prediction Equation for forward computation.
@@ -19,10 +21,9 @@ real-time seismology and the processing of large-scale historical earthquake cat
 * **Historical & Modern Data:** Support for both recent instrumental records and macroseismic (historical) observations.
 * **User-Friendly:** Simple ASCII input/output, PEP8 compliant, and structured for researchers and Python-beginners.
 
-1 METHODOLOGY
-===================
+## 1 METHODOLOGY
 
-The inversion follows the probabilistic inverse theory and total error budget 
+The inversion follows the probabilistic theory and total error budget 
 accounting for both observational and theoretical uncertainties as described in Tarantola (2005).
 The JMA intensity prediction is following Morikawa and Fujiwara (2013).
 
@@ -33,18 +34,14 @@ Mathematics, Philadelphia, USA.
   Morikawa, N., Fujiwara, H. (2013). A New Ground Motion Prediction Equation
 for Japan Applicable up to M9 Mega-Earthquake, J. Disaster Res., 8(5), 878-888. [https://doi.org/10.20965/jdr.2013.p0878](https://doi.org/10.20965/jdr.2013.p0878)
 
-2 DATABASE (SQLite)
-===================
+## 2 V<sub>S30</sub> DATABASE
 
 If missing V<sub>S30</sub> values are detected, the system automatically interfaces with an
 optimized SQLite subset of the J-SHIS-derived database for Japan (Hallo, 2026):
 
-  Hallo, M. (2026). Research Dataset: Optimized Site Parameters (Vs30) 
-for Seismic Hazard Analysis in Japan (derived from J-SHIS) [Data set]. 
-Zenodo. [https://doi.org/10.5281/zenodo.19379171](https://doi.org/10.5281/zenodo.19379171)
+  Hallo, M. (2026). Research Dataset: Optimized Site Parameters Vs30 for Seismic Hazard Analysis in Japan (derived from J-SHIS) (v1.0) [Dataset]. Zenodo. [https://doi.org/10.5281/zenodo.19379171](https://doi.org/10.5281/zenodo.19379171)
 
-3 TECHNICAL IMPLEMENTATION
-===================
+## 3 TECHNICAL IMPLEMENTATION
 
 [![PEP8](https://img.shields.io/badge/code%20style-pep8-orange.svg)](https://www.python.org/dev/peps/pep-0008/)
 
@@ -53,51 +50,45 @@ The computational engine is engineered for maximum throughput by bypassing stand
 * **JIT Compilation:** Every critical path, from the Forward GMPE evaluation to the Likelihood summation, is Just-In-Time (JIT) compiled. This transforms Python code into optimized machine code tailored for the specific hardware (CPU or GPU).
 * **Multi-Device Scaling:** Leveraging JAX allows the 3D grid-search to be offloaded to GPU/TPU without code changes. On multi-core CPUs, it utilizes all available threads via vectorized operations rather than standard multiprocessing.
 * **Vectorized Grid Search:** Instead of iterative loops, the framework uses nested vectorization (`vmap`). The 3D parameter space is treated as a high-dimensional tensor, allowing the hardware to evaluate thousands of potential epicenters and magnitudes in a single clock cycle.
-* **SQLite Spatial Indexing:** Automatic retrieval is powered by a high-performance SQLite backend. This allows for rapid spatial lookups within a processed database, ensuring that even datasets with missing site data are enriched with industry-standard values.
-* **PEP8 & Linting:** The codebase is strictly linted using **Flake8**, ensuring high maintainability and integration readiness for enterprise environments.
+* **SQLite Spatial Indexing:** Automatic retrieval is powered by a high-performance SQLite backend. This allows for rapid spatial lookups within a processed database.
+* **PEP8 & Linting:** The codebase is strictly linted using **Flake8** ensuring high maintainability.
 * **Modular I/O:** Designed with a decoupled architecture, allowing the core inversion engine to be wrapped into automated APIs or triggered via CLI as part of a larger pipeline.
 
 The official software version is archived on Zenodo:
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19603409.svg)](https://doi.org/10.5281/zenodo.19603409)
 
-Cite as: Hallo, M. (2026). JAX-accelerated Bayesian earthquake location from JMA seismic intensity (v1.0). Zenodo. https://doi.org/10.5281/zenodo.19603409
+## 4 PACKAGE CONTENT
 
-4 PACKAGE CONTENT
-===================
+1. `utils/` — Directory containing supporting Python modules and SQL interface
+2. `location_jma_intensity.py` — Main execution script for the Bayesian inversion
+3. `config.py` — Configuration module to define inversion parameters and search area
+4. `plotting.py` — Python module for high-quality visualization of results and PDFs
+5. `INPUT.txt` — Example input file with observed JMA intensity data and V<sub>S30</sub> values
+6. `requirements.txt` — Pip requirements file for automated installation of dependencies
 
-  1. `utils/` — Directory containing supporting Python modules and SQL interface
-  2. `location_jma_intensity.py` — Main execution script for the Bayesian inversion
-  3. `config.py` — Configuration module to define inversion parameters and search area
-  4. `plotting.py` — Python module for high-quality visualization of results and PDFs
-  5. `INPUT.txt` — Example input file with observed JMA intensity data and V<sub>S30</sub> values
-  6. `requirements.txt` — Pip requirements file for automated installation of dependencies
+## 5 REQUIREMENTS
 
-5 REQUIREMENTS
-===================
-
-  Python: Version 3.12 or higher
+Python: Version 3.12 or higher
   
-  Libraries: jax, numpy, matplotlib, pandas, geopandas, sqlalchemy, requests, shapely, psutil
+Libraries: jax, numpy, matplotlib, pandas, geopandas, sqlalchemy, requests, shapely, psutil
 
-  Install dependencies via pip:
+Install dependencies via pip:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-6 USAGE
-===================
+## 6 USAGE
 
-  1. Prepare your `INPUT.txt` input file (see the detailed format in the comments of `config.py`)
-  1. Set up the search area and inversion parameters in the `config.py` file
-  2. Execute the inversion: `python location_jma_intensity.py`
-  3. Check the `results` directory for output figures and the summary text file
+1. Prepare your `INPUT.txt` input file (see the detailed format in the comments of `config.py`)
+2. Set up the search area and inversion parameters in the `config.py` file
+3. Execute the inversion: `python location_jma_intensity.py`
+4. Check the `results` directory for output figures and the summary text file
 
-7 EXAMPLE OUTPUT
-===================
+## 7 EXAMPLE OUTPUT
 
-The computation process is monitored, and the tool informs the user in real-time about the progress. See the example below:
+The computation process is monitored, and the tool informs the user in real-time about the progress:
 ```text
 [*] Read input file
 [*] Prepare input data
@@ -160,8 +151,7 @@ of highly asymmetric posterior PDFs.
   35.06636  135.65568  6.46    5.099   -3.699
 ```
 
-8 COPYRIGHT
-===================
+## 8 COPYRIGHT
 
 Copyright (C) 2026 Kyoto University
 
@@ -176,5 +166,15 @@ This code is distributed in the hope that it will be useful, but WITHOUT
 ANY WARRANTY. We would like to kindly ask you to acknowledge the authors
 and don't remove their names from the code.
 
-You should have received copy of the GNU General Public License along
+You should have received a copy of the GNU General Public License along
 with this program. If not, see <http://www.gnu.org/licenses/>.
+
+## 9 CITE AS
+
+If you use this tools suite, please cite both the original database and the software as follows:
+
+### For the V<sub>S30</sub> database:
+> Hallo, M. (2026). Research Dataset: Optimized Site Parameters Vs30 for Seismic Hazard Analysis in Japan (derived from J-SHIS) (v1.0) [Dataset]. Zenodo. [https://doi.org/10.5281/zenodo.19379171](https://doi.org/10.5281/zenodo.19379171)
+
+### For the specific software version:
+> Hallo, M. (2026). JAX-accelerated Bayesian earthquake location from seismic intensity (v1.0) [Software]. Zenodo. [https://doi.org/10.5281/zenodo.19603409](https://doi.org/10.5281/zenodo.19603409)

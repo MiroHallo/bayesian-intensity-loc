@@ -1,0 +1,43 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+authors:
+  - family-names: "Hallo"
+    given-names: "Miroslav"
+    orcid: "https://orcid.org/0000-0001-5865-7767"
+title: "JAX-accelerated Bayesian earthquake location from seismic intensity"
+abstract: "A JAX-accelerated Python framework for seismic source inversion and uncertainty quantification using JMA intensity data in Japan."
+version: "1.0"
+doi: "10.5281/zenodo.19603409"
+date-released: "2026-04-16"
+license: GPL-3.0-or-later
+repository-code: "https://github.com/MiroHallo/bayesian-intensity-loc"
+keywords:
+  - "Bayesian inference"
+  - "uncertainty quantification"
+  - "seismology"
+  - "JAX"
+  - "seismic intensity"
+  - "probability density function"
+  - "seismic hazard"
+  - "GPU"
+  - "vs30"
+  - "site effects"
+  - "Japan"
+  - "python"
+  - "SQL"
+  - "high performance computing"
+
+# -------------------------------------------------------------------
+# Other citations
+references:
+  - type: data
+    authors:
+      - family-names: "Hallo"
+        given-names: "Miroslav"
+        orcid: "https://orcid.org/0000-0001-5865-7767"
+    title: "Research Dataset: Optimized Site Parameters Vs30 for Seismic Hazard Analysis in Japan (derived from J-SHIS)"
+    year: 2026
+    publisher:
+      name: "Zenodo"
+    doi: "10.5281/zenodo.19379171"
