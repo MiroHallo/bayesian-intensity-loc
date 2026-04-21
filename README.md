@@ -8,7 +8,7 @@ A JAX-accelerated Python framework for seismic source inversion and uncertainty 
 
 ![Python](https://img.shields.io/badge/Python-%233776AB?style=flat&logo=python&logoColor=white)
 [![PEP8](https://img.shields.io/badge/code%20style-pep8-brightgreen?style=flat&labelColor=%233776AB)](https://www.python.org/dev/peps/pep-0008/)
-![HPC](https://img.shields.io/badge/HPC-JAX-%20(CPU%2FGPU%2FTPU)-%235F6368?style=flat)
+![HPC](https://img.shields.io/badge/HPC-JAX%20(CPU%2FGPU%2FTPU)-%235F6368?style=flat)
 ![SQLite](https://img.shields.io/badge/SQLite-%23003B57?style=flat&logo=sqlite&logoColor=white)
 
 ---
