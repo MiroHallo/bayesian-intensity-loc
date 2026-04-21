@@ -42,7 +42,7 @@ Mathematics, Philadelphia, USA.
 ### Japan
 
 * **JMA instrumental seismic intensity (Shindo) scale:** This tool has inplemented the JMA instrumental seismic intensity prediction following Morikawa and Fujiwara (2013).
-* **V<sub>S30</sub> database:** If missing V<sub>S30</sub> values are detected, the system automatically interfaces with an
+    * **V<sub>S30</sub> database:** If missing V<sub>S30</sub> values are detected, the system automatically interfaces with an
 optimized SQLite subset of the J-SHIS-derived database for Japan (Hallo, 2026), and assigns V<sub>S30</sub> values from the database.
 * Morikawa, N., Fujiwara, H. (2013). A New Ground Motion Prediction Equation
 for Japan Applicable up to M9 Mega-Earthquake, J. Disaster Res., 8(5), 878-888. [https://doi.org/10.20965/jdr.2013.p0878](https://doi.org/10.20965/jdr.2013.p0878)
