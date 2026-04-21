@@ -2,6 +2,15 @@
 
 A JAX-accelerated Python framework for seismic source inversion and uncertainty quantification using JMA intensity.
 
+<a href="#cite"><img src="https://img.shields.io/badge/CITE%20AS-grey?style=flat" alt="Cite As"></a>
+[![DATABASE](https://img.shields.io/badge/DATABASE-10.5281%2Fzenodo.19379171-%23007EC6?style=flat)](https://doi.org/10.5281/zenodo.19379171)
+[![SOFTWARE](https://img.shields.io/badge/SOFTWARE-10.5281%2Fzenodo.19603409-%23007EC6?style=flat)](https://doi.org/10.5281/zenodo.19603409)
+
+![Python](https://img.shields.io/badge/Python-%233776AB?style=flat&logo=python&logoColor=white)
+[![PEP8](https://img.shields.io/badge/code%20style-pep8-brightgreen?style=flat&labelColor=%233776AB)](https://www.python.org/dev/peps/pep-0008/)
+![HPC](https://img.shields.io/badge/HPC-JAX--JIT%20(CPU%2FGPU%2FTPU)-%235F6368?style=flat&logo=google&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLite-%23003B57?style=flat&logo=sqlite&logoColor=white)
+
 ---
 
 This tool is a high-performance Python framework designed for Bayesian inversion of 
@@ -43,8 +52,6 @@ optimized SQLite subset of the J-SHIS-derived database for Japan (Hallo, 2026):
 
 ## 3 TECHNICAL IMPLEMENTATION
 
-[![PEP8](https://img.shields.io/badge/code%20style-pep8-orange.svg)](https://www.python.org/dev/peps/pep-0008/)
-
 The computational engine is engineered for maximum throughput by bypassing standard Python execution loops in favor of **XLA (Accelerated Linear Algebra)**:
 
 * **JIT Compilation:** Every critical path, from the Forward GMPE evaluation to the Likelihood summation, is Just-In-Time (JIT) compiled. This transforms Python code into optimized machine code tailored for the specific hardware (CPU or GPU).
@@ -53,10 +60,6 @@ The computational engine is engineered for maximum throughput by bypassing stand
 * **SQLite Spatial Indexing:** Automatic retrieval is powered by a high-performance SQLite backend. This allows for rapid spatial lookups within a processed database.
 * **PEP8 & Linting:** The codebase is strictly linted using **Flake8** ensuring high maintainability.
 * **Modular I/O:** Designed with a decoupled architecture, allowing the core inversion engine to be wrapped into automated APIs or triggered via CLI as part of a larger pipeline.
-
-The official software version is archived on Zenodo:
-
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19603409.svg)](https://doi.org/10.5281/zenodo.19603409)
 
 ## 4 PACKAGE CONTENT
 
@@ -169,6 +172,7 @@ and don't remove their names from the code.
 You should have received a copy of the GNU General Public License along
 with this program. If not, see <http://www.gnu.org/licenses/>.
 
+<a name="cite"></a>
 ## 9 CITE AS
 
 If you use this tools suite, please cite both the original database and the software as follows:
