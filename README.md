@@ -24,7 +24,7 @@ ensuring no local minima are missed. By leveraging JAX for massive parallelizati
 allows for near-instantaneous evaluation on both CPU and GPU, making it ideal for both 
 real-time modern seismology and the processing of historical earthquakes. Key Features:
 * **HPC Ready:** Fully vectorized backend using JAX (XLA) with seamless support for CPU/GPU/TPU acceleration.
-* **Bayesian Framework:** Complete 3D PDF evaluation accounting for both observational uncertainties and modeling errors.
+* **Bayesian Framework:** Complete 3D PDF evaluation accounting for both observational and modeling errors.
 * **Scientific GMPE:** Implements the Morikawa & Fujiwara (2013) Ground Motion Prediction Equation for forward computation.
 * **Automatic Site Effects:** Integrated workflow for automated V<sub>S30</sub> retrieval from a high-resolution J-SHIS-derived SQL database for Japan (for sites in Japan without direct V<sub>S30</sub> measurements).
 * **Historical & Modern Data:** Support for both recent instrumental records and macroseismic (historical) observations.
@@ -44,6 +44,8 @@ Mathematics, Philadelphia, USA.
 for Japan Applicable up to M9 Mega-Earthquake, J. Disaster Res., 8(5), 878-888. [https://doi.org/10.20965/jdr.2013.p0878](https://doi.org/10.20965/jdr.2013.p0878)
 
 ## 2 V<sub>S30</sub> DATABASE
+
+### Japan
 
 If missing V<sub>S30</sub> values are detected, the system automatically interfaces with an
 optimized SQLite subset of the J-SHIS-derived database for Japan (Hallo, 2026):
@@ -67,7 +69,7 @@ The computational engine is engineered for maximum throughput by bypassing stand
 2. `location_jma_intensity.py` — Main execution script for the Bayesian inversion
 3. `config.py` — Configuration module to define inversion parameters and search area
 4. `plotting.py` — Python module for high-quality visualization of results and PDFs
-5. `INPUT.txt` — Example input file with observed JMA intensity data and V<sub>S30</sub> values
+5. `INPUT.txt` — Example input file with observed seismic intensity data and V<sub>S30</sub> values
 6. `requirements.txt` — Pip requirements file for automated installation of dependencies
 
 ## 5 REQUIREMENTS
