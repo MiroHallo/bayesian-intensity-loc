@@ -41,7 +41,7 @@ Mathematics, Philadelphia, USA.
 
 ### Japan
 
-* **JMA instrumental seismic intensity (Shindo) scale:**
+* **JMA instrumental seismic intensity scale (Shindo):**
   * This tool has inplemented the JMA ([Japan Meteorological Agency](https://www.jma.go.jp/jma/en/Activities/inttable.html)) instrumental seismic intensity prediction following Morikawa and Fujiwara (2013).
   * Morikawa, N., Fujiwara, H. (2013). A New Ground Motion Prediction Equation
 for Japan Applicable up to M9 Mega-Earthquake, J. Disaster Res., 8(5), 878-888. [https://doi.org/10.20965/jdr.2013.p0878](https://doi.org/10.20965/jdr.2013.p0878)
@@ -176,7 +176,7 @@ with this program. If not, see <http://www.gnu.org/licenses/>.
 
 If you use this tools suite, please cite both the original database and the software as follows:
 
-### For the V<sub>S30</sub> database:
+### For the V<sub>S30</sub> database (Japan):
 > Hallo, M. (2026). Research Dataset: Optimized Site Parameters Vs30 for Seismic Hazard Analysis in Japan (derived from J-SHIS) (v1.0) [Dataset]. Zenodo. [https://doi.org/10.5281/zenodo.19379171](https://doi.org/10.5281/zenodo.19379171)
 
 ### For the specific software version:
