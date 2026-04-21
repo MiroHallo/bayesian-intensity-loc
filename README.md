@@ -14,8 +14,7 @@ A JAX-accelerated Python framework for seismic source inversion and uncertainty 
 ---
 
 This tool is a high-performance Python framework designed for Bayesian inversion of 
-earthquake epicenters and moment magnitudes (M<sub>w</sub>) specifically tailored for 
-the Japanese JMA instrumental seismic intensity (Shindo) scale. Following the 
+earthquake epicenters and moment magnitudes (M<sub>w</sub>). Following the 
 probabilistic inverse theory of Tarantola (2005), it fully accounts for uncertainties 
 in both the measured data (seismic intensity) and the theoretical model (ground motion 
 prediction equation, GMPE). The system evaluates the posterior Probability Density 
@@ -25,7 +24,6 @@ allows for near-instantaneous evaluation on both CPU and GPU, making it ideal fo
 real-time modern seismology and the processing of historical earthquakes. Key Features:
 * **HPC Ready:** Fully vectorized backend using JAX (XLA) with seamless support for CPU/GPU/TPU acceleration.
 * **Bayesian Framework:** Complete 3D PDF evaluation accounting for both observational and modeling errors.
-* **Scientific GMPE:** Implements the Morikawa & Fujiwara (2013) Ground Motion Prediction Equation for forward computation.
 * **Automatic Site Effects:** Integrated workflow for automated V<sub>S30</sub> retrieval from a high-resolution J-SHIS-derived SQL database for Japan (for sites in Japan without direct V<sub>S30</sub> measurements).
 * **Historical & Modern Data:** Support for both recent instrumental records and macroseismic (historical) observations.
 * **User-Friendly:** Simple ASCII input/output, PEP8 compliant, and structured for researchers and Python-beginners.
@@ -34,23 +32,23 @@ real-time modern seismology and the processing of historical earthquakes. Key Fe
 
 The inversion follows the probabilistic theory and total error budget 
 accounting for both observational and theoretical uncertainties as described in Tarantola (2005).
-The JMA intensity prediction is following Morikawa and Fujiwara (2013).
 
   Tarantola, A. (2005, Chapter 7.1). Inverse Problem Theory and Methods 
 for Model Parameter Estimation, Society for Industrial and Applied 
 Mathematics, Philadelphia, USA.
 
-  Morikawa, N., Fujiwara, H. (2013). A New Ground Motion Prediction Equation
-for Japan Applicable up to M9 Mega-Earthquake, J. Disaster Res., 8(5), 878-888. [https://doi.org/10.20965/jdr.2013.p0878](https://doi.org/10.20965/jdr.2013.p0878)
-
-## 2 V<sub>S30</sub> DATABASE
+## 2 LOCALIZATION
 
 ### Japan
 
-If missing V<sub>S30</sub> values are detected, the system automatically interfaces with an
-optimized SQLite subset of the J-SHIS-derived database for Japan (Hallo, 2026):
+* **JMA instrumental seismic intensity (Shindo) scale:** This tool has inplemented the JMA instrumental seismic intensity prediction following Morikawa and Fujiwara (2013).
+* **V<sub>S30</sub> database:** If missing V<sub>S30</sub> values are detected, the system automatically interfaces with an
+optimized SQLite subset of the J-SHIS-derived database for Japan (Hallo, 2026), and assigns V<sub>S30</sub> values from the database.
 
-  Hallo, M. (2026). Research Dataset: Optimized Site Parameters Vs30 for Seismic Hazard Analysis in Japan (derived from J-SHIS) (v1.0) [Dataset]. Zenodo. [https://doi.org/10.5281/zenodo.19379171](https://doi.org/10.5281/zenodo.19379171)
+Morikawa, N., Fujiwara, H. (2013). A New Ground Motion Prediction Equation
+for Japan Applicable up to M9 Mega-Earthquake, J. Disaster Res., 8(5), 878-888. [https://doi.org/10.20965/jdr.2013.p0878](https://doi.org/10.20965/jdr.2013.p0878)
+
+Hallo, M. (2026). Research Dataset: Optimized Site Parameters Vs30 for Seismic Hazard Analysis in Japan (derived from J-SHIS) (v1.0) [Dataset]. Zenodo. [https://doi.org/10.5281/zenodo.19379171](https://doi.org/10.5281/zenodo.19379171)
 
 ## 3 TECHNICAL IMPLEMENTATION
 
