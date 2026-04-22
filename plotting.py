@@ -1,16 +1,21 @@
 #!/usr/bin/env python3
 # =============================================================================
-# EARTHQUAKE EPICENTER LOCATION FROM SEISMIC INTENSITY - PLOTTING RESULTS
+# EARTHQUAKE EPICENTER LOCATION FROM SEISMIC INTENSITY - PLOTTING
 #
 # Author: Miroslav HALLO, Kyoto University
 # E-mail: hallo.miroslav.2a@kyoto-u.ac.jp
 # Tested with: Python 3.12.3, Jax 0.9.2, Matplotlib 3.10.8, NumPy 2.4.4,
 #              Pandas 3.0.2, GeoPandas 1.1.3
 # Description: Location of the earthquake epicenter and moment magnitude from
-#              JMA instrumental seismic intensity (historical or modern). The
-#              JMA intensity prediction is following Morikawa and Fujiwara
-#              (2013). Includes automatic Vs30 querying from J-SHIS derived
-#              Vs30 database for sites without Vs30 measurements.
+#              instrumental seismic intensity (historical or modern).
+#              Japan: JMA Seismic Intensity Scale (Shindo), instrumental
+#                     prediction is following Morikawa and Fujiwara (2013).
+#                     Includes automatic Vs30 querying from J-SHIS derived
+#                     database for sites without Vs30 measurements.
+#              USA: Modified Mercalli Intensity (MMI), instrumental prediction
+#                     by Atkinson et al. (2014) for western North America.
+#              EU: European Macroseismic (EMS-98), instrumental prediction
+#                     by Bindi et al. (2011) and Faenza and Michelini (2010).
 #
 # Copyright (C) 2026 Kyoto University
 #
@@ -25,7 +30,7 @@
 # ANY WARRANTY. We would like to kindly ask you to acknowledge the authors
 # and don't remove their names from the code.
 #
-# You should have received copy of the GNU General Public License along
+# You should have received a copy of the GNU General Public License along
 # with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 # =============================================================================
@@ -40,12 +45,58 @@ import matplotlib.ticker as ticker
 import numpy as np
 import pandas as pd
 
+from config import INPUT, ScaleType
+
+
+# =============================================================================
+# CONSTANTS
+# =============================================================================
+
+# JMA intensity scale colors (RGB)
+JMA_COLORS = {
+    'INT_7':  [153/255, 51/255, 153/255],
+    'INT_6P': [153/255, 0/255, 0/255],
+    'INT_6M': [255/255, 51/255, 0/255],
+    'INT_5P': [255/255, 140/255, 0/255],
+    'INT_5M': [255/255, 255/255, 0/255],
+    'INT_4':  [255/255, 250/255, 205/255],
+    'INT_3':  [58/255, 95/255, 205/255],
+    'INT_2':  [135/255, 206/255, 250/255],
+    'INT_1':  [200/255, 250/255, 255/255],
+}
+
+# Historical JMA intensity scale colors (RGB)
+JMA_HIST_COLORS = {
+    'INT_S': [0/255, 0/255, 128/255],
+    'INT_E': [58/255, 95/255, 205/255],
+    'INT_e': [135/255, 206/255, 250/255],
+}
+
+# USGS ShakeMap MMI colors (RGB)
+MMI_COLORS = {
+    'I':    [1.0, 1.0, 1.0],
+    'II':   [0.75, 0.85, 1.0],
+    'III':  [0.63, 0.82, 1.0],
+    'IV':   [0.5, 1.0, 1.0],
+    'V':    [0.5, 1.0, 0.5],
+    'VI':   [1.0, 1.0, 0.0],
+    'VII':  [1.0, 0.67, 0.0],
+    'VIII': [1.0, 0.0, 0.0],
+    'IX':   [0.75, 0.0, 0.0],
+    'X':    [0.5, 0.0, 0.0],
+}
+
+# Other colors (RGB)
+OTHER_COLORS = {
+    'NAN': [0.8, 0.8, 0.8],
+}
+
 
 # =============================================================================
 # FUNCTIONS
 # =============================================================================
 
-# Prepare RGB color for all data points
+# Prepare JMA intensity scale RGB color for all data points
 def get_jma_color(row: pd.Series) -> List[float]:
     """
     Get RGB color for the JMA intensity, including historical scale e, E, S.
@@ -56,45 +107,90 @@ def get_jma_color(row: pd.Series) -> List[float]:
         List[float]: A list of 3 floats [R, G, B] in range 0.0 to 1.0.
     """
     # Generic color in case of an error
-    nan_color = [0.8, 0.8, 0.8]
     try:
         # Check for NaN
         if pd.isna(row['int']):
-            return nan_color
+            return OTHER_COLORS['NAN']
         # Convert to float
         val = float(row['int'])
     except (ValueError, TypeError):
-        return nan_color
+        return OTHER_COLORS['NAN']
 
     # JMA Shindo scale
-    if val >= 6.5:  # JMA int 7
-        color = [153/255, 51/255, 153/255]
-    elif val >= 6.0:  # JMA int 6+
-        color = [153/255, 0/255, 0/255]
-    elif val >= 5.5:  # JMA int 6-
-        color = [255/255, 51/255, 0/255]
-    elif val >= 5.0:  # JMA int 5+
-        color = [255/255, 140/255, 0/255]
-    elif val >= 4.5:  # JMA int 5-
-        color = [255/255, 255/255, 0/255]
-    elif val >= 3.5:  # JMA int 4
-        color = [255/255, 250/255, 205/255]
-    elif val >= 2.5:  # JMA int 3
-        color = [58/255, 95/255, 205/255]
-    elif val >= 1.5:  # JMA int 2
-        color = [135/255, 206/255, 250/255]
-    else:            # JMA int 1
-        color = [200/255, 250/255, 255/255]
+    if val >= 6.5:
+        color = JMA_COLORS['INT_7']
+    elif val >= 6.0:
+        color = JMA_COLORS['INT_6P']
+    elif val >= 5.5:
+        color = JMA_COLORS['INT_6M']
+    elif val >= 5.0:
+        color = JMA_COLORS['INT_5P']
+    elif val >= 4.5:
+        color = JMA_COLORS['INT_5M']
+    elif val >= 3.5:
+        color = JMA_COLORS['INT_4']
+    elif val >= 2.5:
+        color = JMA_COLORS['INT_3']
+    elif val >= 1.5:
+        color = JMA_COLORS['INT_2']
+    else:
+        color = JMA_COLORS['INT_1']
 
     # Historical scale
     if pd.notna(row['text']):
         note = str(row['text']).strip()
         if note == 'e':
-            color = [135/255, 206/255, 250/255]
+            color = JMA_HIST_COLORS['INT_e']
         elif note == 'E':
-            color = [58/255, 95/255, 205/255]
+            color = JMA_HIST_COLORS['INT_E']
         elif note == 'S':
-            color = [0/255, 0/255, 128/255]
+            color = JMA_HIST_COLORS['INT_S']
+
+    return color
+
+
+# -----------------------------------------------------------------------------
+# Prepare MMI intensity scale RGB color for all data points
+def get_mmi_color(row: pd.Series) -> List[float]:
+    """
+    Get RGB color for the MMI intensity based on USGS ShakeMap standards.
+
+    Args:
+        row (pd.Series): One row of Pandas table (must contain 'int').
+    Returns:
+        List[float]: A list of 3 floats [R, G, B] in range 0.0 to 1.0.
+    """
+    # Generic color in case of an error
+    try:
+        # Check for NaN
+        if pd.isna(row['int']):
+            return OTHER_COLORS['NAN']
+        # Convert to float
+        val = float(row['int'])
+    except (ValueError, TypeError):
+        return OTHER_COLORS['NAN']
+
+    # MMI intensity scale (standard USGS binning)
+    if val >= 9.5:
+        color = MMI_COLORS['X']
+    elif val >= 8.5:
+        color = MMI_COLORS['IX']
+    elif val >= 7.5:
+        color = MMI_COLORS['VIII']
+    elif val >= 6.5:
+        color = MMI_COLORS['VII']
+    elif val >= 5.5:
+        color = MMI_COLORS['VI']
+    elif val >= 4.5:
+        color = MMI_COLORS['V']
+    elif val >= 3.5:
+        color = MMI_COLORS['IV']
+    elif val >= 2.5:
+        color = MMI_COLORS['III']
+    elif val >= 1.5:
+        color = MMI_COLORS['II']
+    else:
+        color = MMI_COLORS['I']
 
     return color
 
@@ -346,7 +442,7 @@ def plot_misfits(loc_ml: List[float], x_st: np.ndarray, y_st: np.ndarray,
     # Titles
     ax.set_title('The ML/MAP solution misfit', fontweight='normal')
     ax.set_xlabel('Epicentral distance (km)')
-    ax.set_ylabel('JMA Intensity misfits')
+    ax.set_ylabel('Instrumental intensity misfits')
 
     # Box formating
     ax.set_axisbelow(False)
@@ -409,29 +505,45 @@ def plot_station_map(data: gpd.GeoDataFrame, loc_ml: List[float],
     ax.plot(grid_rect_x, grid_rect_y, color='#33cc33', linewidth=1.5,
             label='Search area', zorder=2)
 
-    # Proxy Artists
-    has_special_flags = data['text'].isin(['e', 'E', 'S']).any()
-    common_levels = [
-        ("Int 7",  [153/255, 51/255, 153/255]),
-        ("Int 6+", [153/255, 0/255, 0/255]),
-        ("Int 6-", [255/255, 51/255, 0/255]),
-        ("Int 5+", [255/255, 140/255, 0/255]),
-        ("Int 5-", [255/255, 255/255, 0/255]),
-        ("Int 4",  [255/255, 250/255, 205/255]),
-    ]
-    if has_special_flags:
-        shindo_levels = common_levels + [
-            ("S (hist)",  [0/255, 0/255, 128/255]),
-            ("E (hist)",  [58/255, 95/255, 205/255]),
-            ("e (hist)",  [135/255, 206/255, 250/255])
+    # Define proxy artists
+    if INPUT.scale == ScaleType.JMA:  # Japan (JMA Shindo)
+        has_special_flags = data['text'].isin(['e', 'E', 'S']).any()
+        common_levels = [
+            ("Int 7",  JMA_COLORS['INT_7']),
+            ("Int 6+", JMA_COLORS['INT_6P']),
+            ("Int 6-", JMA_COLORS['INT_6M']),
+            ("Int 5+", JMA_COLORS['INT_5P']),
+            ("Int 5-", JMA_COLORS['INT_5M']),
+            ("Int 4",  JMA_COLORS['INT_4']),
         ]
-    else:
-        shindo_levels = common_levels + [
-            ("Int 3", [58/255, 95/255, 205/255]),
-            ("Int 2", [135/255, 206/255, 250/255]),
-            ("Int 1", [200/255, 250/255, 255/255])
+        if has_special_flags:
+            int_levels = common_levels + [
+                ("S (hist)", JMA_HIST_COLORS['INT_S']),
+                ("E (hist)", JMA_HIST_COLORS['INT_E']),
+                ("e (hist)", JMA_HIST_COLORS['INT_e']),
+            ]
+        else:
+            int_levels = common_levels + [
+                ("Int 3", JMA_COLORS['INT_3']),
+                ("Int 2", JMA_COLORS['INT_2']),
+                ("Int 1", JMA_COLORS['INT_1']),
+            ]
+    elif INPUT.scale in [ScaleType.MMI, ScaleType.EMS98]:  # USA and EU
+        int_levels = [
+            ("X+",   MMI_COLORS['X']),
+            ("IX",   MMI_COLORS['IX']),
+            ("VIII", MMI_COLORS['VIII']),
+            ("VII",  MMI_COLORS['VII']),
+            ("VI",   MMI_COLORS['VI']),
+            ("V",    MMI_COLORS['V']),
+            ("IV",   MMI_COLORS['IV']),
+            ("III",  MMI_COLORS['III']),
+            ("II",   MMI_COLORS['II']),
+            ("I",    MMI_COLORS['I']),
         ]
-    for label, color in shindo_levels:
+
+    # Plot proxy artists
+    for label, color in int_levels:
         ax.scatter([], [], c=[color], marker='s', linewidths=0.1,
                    edgecolors='k', s=50, label=label)
 

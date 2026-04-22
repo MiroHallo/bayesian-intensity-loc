@@ -43,11 +43,24 @@ Mathematics, Philadelphia, USA.
 
 * **JMA Seismic Intensity Scale (Shindo):**
   * This tool can evaluate instrumental seismic intensity following the Japan Meteorological Agency (JMA) Shindo scale methodology, based on the prediction equations by Morikawa and Fujiwara (2013). Technical details on the JMA Seismic Intensity Scale can be found on the JMA website ([EN-figure](https://www.jma.go.jp/jma/en/Activities/intsummary.pdf), [EN-table](https://www.jma.go.jp/jma/en/Activities/inttable.html), [JP](https://www.jma.go.jp/jma/kishou/know/shindo/index.html)).
-  * Morikawa, N., Fujiwara, H. (2013). A New Ground Motion Prediction Equation for Japan Applicable up to M9 Mega-Earthquake, J. Disaster Res., 8(5), 878-888. [https://doi.org/10.20965/jdr.2013.p0878](https://doi.org/10.20965/jdr.2013.p0878)
+  * Morikawa, N., Fujiwara, H. (2013). A New Ground Motion Prediction Equation for Japan Applicable up to M9 Mega-Earthquake. J. Disaster Res., 8(5), 878-888. [https://doi.org/10.20965/jdr.2013.p0878](https://doi.org/10.20965/jdr.2013.p0878)
 * **V<sub>S30</sub> Database:**
   * If missing V<sub>S30</sub> values are detected, the system automatically interfaces with an optimized SQLite subset of the J-SHIS-derived database for Japan (Hallo, 2026), and assigns V<sub>S30</sub> values from the database.
   * The database is a processed subset (derivative research work) of the J-SHIS seismic hazard data from the National Research Institute for Earth Science and Disaster Resilience (NIED). Technical details on the J-SHIS seismic hazard data can be found on the J-SHIS website ([EN](https://www.j-shis.bosai.go.jp/en/), [JP](https://www.j-shis.bosai.go.jp/)).
   * Hallo, M. (2026). Research Dataset: Optimized Site Parameters Vs30 for Seismic Hazard Analysis in Japan (derived from J-SHIS) (v1.0) [Dataset]. Zenodo. [https://doi.org/10.5281/zenodo.19379171](https://doi.org/10.5281/zenodo.19379171)
+
+### USA
+
+* **Modified Mercalli Intensity Scale (MMI):**
+  * This tool can evaluate instrumental seismic intensity following the Modified Mercalli Intensity (MMI) scale methodology, based on the prediction equations by Atkinson et al. (2014). Technical details on the MMI scale can be found on the [USGS website](https://www.usgs.gov/programs/earthquake-hazards/modified-mercalli-intensity-scale).
+  * Atkinson, G.M., Worden, C.B., Wald D.J. (2014). Intensity Prediction Equations for North America. Bulletin of the Seismological Society of America, 104 (6): 3084–3093. [https://doi-org.kyoto-u.idm.oclc.org/10.1785/0120140178](https://doi-org.kyoto-u.idm.oclc.org/10.1785/0120140178)
+
+### EU
+
+* **European Macroseismic Scale (EMS-98):**
+  * This tool can also evaluate instrumental seismic intensity following the European Macroseismic (EMS-98) scale methodology, based on the PGV prediction equations by Bindi et al. (2011) and PGV-to-Intensity conversion by Faenza and Michelini (2010). Technical details on the European Macroseismic (EMS-98) scale can be found on the [GFZ website](https://www.gfz.de/en/section/seismic-hazard-and-risk-dynamics/data-products-services/ems-98-european-macroseismic-scale).
+  * Bindi, D., Pacor, F., Luzi, L., Puglia, R., Massa, M., Ameri, G., Paolucci, R. (2011). Ground motion prediction equations derived from the Italian strong motion database. Bulletin of Earthquake Engineering, 9, 1899–1920. [https://doi.org/10.1007/s10518-011-9313-z](https://doi.org/10.1007/s10518-011-9313-z)
+  * Faenza, L., Michelini, A. (2010). Regression analysis of MCS intensity and ground motion parameters in Italy and its application in ShakeMap. Geophysical Journal International, 180 (3), 1138–1152. [https://doi.org/10.1111/j.1365-246X.2009.04467.x](https://doi.org/10.1111/j.1365-246X.2009.04467.x)
 
 ## 3 TECHNICAL IMPLEMENTATION
 
@@ -63,7 +76,7 @@ The computational engine is engineered for maximum throughput by bypassing stand
 ## 4 PACKAGE CONTENT
 
 1. `utils/` — Directory containing supporting Python modules and SQL interface
-2. `location_jma_intensity.py` — Main execution script for the Bayesian inversion
+2. `location_intensity.py` — Main execution script for the Bayesian inversion
 3. `config.py` — Configuration module to define inversion parameters and search area
 4. `plotting.py` — Python module for high-quality visualization of results and PDFs
 5. `INPUT.txt` — Example input file with observed seismic intensity data and V<sub>S30</sub> values
@@ -85,13 +98,14 @@ pip install -r requirements.txt
 
 1. Prepare your `INPUT.txt` input file (see the detailed format in the comments of `config.py`)
 2. Set up the search area and inversion parameters in the `config.py` file
-3. Execute the inversion: `python location_jma_intensity.py`
+3. Execute the inversion: `python location_intensity.py`
 4. Check the `results` directory for output figures and the summary text file
 
 ## 7 EXAMPLE OUTPUT
 
 The computation process is monitored, and the tool informs the user in real-time about the progress:
 ```text
+[*] Seismic intensity scale: JMA
 [*] Read input file
 [*] Prepare input data
 [*] Found 34 invalid Vs30 values
