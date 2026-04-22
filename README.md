@@ -53,8 +53,8 @@ Mathematics, Philadelphia, USA.
 
 The computational engine is engineered for maximum throughput by bypassing standard Python execution loops in favor of **XLA (Accelerated Linear Algebra)**:
 
-* **JIT Compilation:** Every critical path, from the Forward GMPE evaluation to the Likelihood summation, is Just-In-Time (JIT) compiled. This transforms Python code into optimized machine code tailored for the specific hardware (CPU or GPU).
-* **Multi-Device Scaling:** Leveraging JAX allows the 3D grid-search to be offloaded to GPU/TPU without code changes. On multi-core CPUs, it utilizes all available threads via vectorized operations rather than standard multiprocessing.
+* **JIT Compilation:** Every critical path, from the Forward GMPE evaluation to the Likelihood summation, is Just-In-Time (JIT) compiled. This transforms Python code into optimized machine code tailored for the specific hardware (CPU, GPU, or TPU).
+* **Multi-Device Scaling:** Using JAX allows the grid-search to be offloaded to GPU/TPU without code changes. On multi-core CPUs, it utilizes all available threads via vectorized operations rather than standard multiprocessing.
 * **Vectorized Grid Search:** Instead of iterative loops, the framework uses nested vectorization (`vmap`). The 3D parameter space is treated as a high-dimensional tensor, allowing the hardware to evaluate thousands of potential epicenters and magnitudes in a single clock cycle.
 * **SQLite Spatial Indexing:** Automatic retrieval is powered by a high-performance SQLite backend. This allows for rapid spatial lookups within a processed database.
 * **PEP8 & Linting:** The codebase is strictly linted using **Flake8** ensuring high maintainability.
