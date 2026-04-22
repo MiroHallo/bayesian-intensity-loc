@@ -1,6 +1,6 @@
 # High-Performance Bayesian earthquake location from seismic intensity
 
-A JAX-accelerated Python framework for seismic source inversion and uncertainty quantification using JMA intensity.
+A JAX-accelerated Python framework for seismic source inversion and uncertainty quantification using JMA/MMI/EMS-98 instrumental intensity data.
 
 <a href="#cite"><img src="https://img.shields.io/badge/CITE%20AS-grey?style=flat" alt="Cite As"></a>
 [![DATABASE](https://img.shields.io/badge/DATABASE-10.5281%2Fzenodo.19379171-%23007EC6?style=flat)](https://doi.org/10.5281/zenodo.19379171)
@@ -49,13 +49,13 @@ Mathematics, Philadelphia, USA.
   * The database is a processed subset (derivative research work) of the J-SHIS seismic hazard data from the National Research Institute for Earth Science and Disaster Resilience (NIED). Technical details on the J-SHIS seismic hazard data can be found on the J-SHIS website ([EN](https://www.j-shis.bosai.go.jp/en/), [JP](https://www.j-shis.bosai.go.jp/)).
   * Hallo, M. (2026). Research Dataset: Optimized Site Parameters Vs30 for Seismic Hazard Analysis in Japan (derived from J-SHIS) (v1.0) [Dataset]. Zenodo. [https://doi.org/10.5281/zenodo.19379171](https://doi.org/10.5281/zenodo.19379171)
 
-### USA
+### North America (USA)
 
 * **Modified Mercalli Intensity Scale (MMI):**
   * This tool can evaluate instrumental seismic intensity following the Modified Mercalli Intensity (MMI) scale methodology, based on the prediction equations by Atkinson et al. (2014). Technical details on the MMI scale can be found on the [USGS website](https://www.usgs.gov/programs/earthquake-hazards/modified-mercalli-intensity-scale).
-  * Atkinson, G.M., Worden, C.B., Wald D.J. (2014). Intensity Prediction Equations for North America. Bulletin of the Seismological Society of America, 104 (6): 3084–3093. [https://doi-org.kyoto-u.idm.oclc.org/10.1785/0120140178](https://doi-org.kyoto-u.idm.oclc.org/10.1785/0120140178)
+  * Atkinson, G.M., Worden, C.B., Wald D.J. (2014). Intensity Prediction Equations for North America. Bulletin of the Seismological Society of America, 104 (6): 3084–3093. [https://doi.org/10.1785/0120140178](https://doi.org/10.1785/0120140178)
 
-### EU
+### European Union (EU)
 
 * **European Macroseismic Scale (EMS-98):**
   * This tool can also evaluate instrumental seismic intensity following the European Macroseismic (EMS-98) scale methodology, based on the PGV prediction equations by Bindi et al. (2011) and PGV-to-Intensity conversion by Faenza and Michelini (2010). Technical details on the European Macroseismic (EMS-98) scale can be found on the [GFZ website](https://www.gfz.de/en/section/seismic-hazard-and-risk-dynamics/data-products-services/ems-98-european-macroseismic-scale).
