@@ -1,6 +1,6 @@
 # High-Performance Bayesian earthquake location from seismic intensity
 
-A JAX-accelerated Python framework for seismic source inversion and uncertainty quantification using JMA/MMI/EMS-98 instrumental intensity data.
+A JAX-accelerated Python framework for seismic source inversion and uncertainty quantification using JMA or MMI or EMS-98 instrumental intensity data (modern and historical intensity observations).
 
 <a href="#cite"><img src="https://img.shields.io/badge/CITE%20AS-grey?style=flat" alt="Cite As"></a>
 [![DATABASE](https://img.shields.io/badge/DATABASE-10.5281%2Fzenodo.19379171-%23007EC6?style=flat)](https://doi.org/10.5281/zenodo.19379171)
@@ -43,7 +43,7 @@ Mathematics, Philadelphia, USA.
 
 * **JMA Seismic Intensity Scale (Shindo):**
   * This tool can evaluate instrumental seismic intensity following the Japan Meteorological Agency (JMA) Shindo scale methodology, based on the prediction equations by Morikawa and Fujiwara (2013). Technical details on the JMA Seismic Intensity Scale can be found on the JMA website ([EN-figure](https://www.jma.go.jp/jma/en/Activities/intsummary.pdf), [EN-table](https://www.jma.go.jp/jma/en/Activities/inttable.html), [JP](https://www.jma.go.jp/jma/kishou/know/shindo/index.html)).
-  * Morikawa, N., Fujiwara, H. (2013). A New Ground Motion Prediction Equation for Japan Applicable up to M9 Mega-Earthquake. J. Disaster Res., 8(5), 878-888. [https://doi.org/10.20965/jdr.2013.p0878](https://doi.org/10.20965/jdr.2013.p0878)
+  * Morikawa, N. and Fujiwara, H. (2013). A New Ground Motion Prediction Equation for Japan Applicable up to M9 Mega-Earthquake. J. Disaster Res., 8(5), 878-888. [https://doi.org/10.20965/jdr.2013.p0878](https://doi.org/10.20965/jdr.2013.p0878)
 * **V<sub>S30</sub> Database:**
   * If missing V<sub>S30</sub> values are detected, the system automatically interfaces with an optimized SQLite subset of the J-SHIS-derived database for Japan (Hallo, 2026), and assigns V<sub>S30</sub> values from the database.
   * The database is a processed subset (derivative research work) of the J-SHIS seismic hazard data from the National Research Institute for Earth Science and Disaster Resilience (NIED). Technical details on the J-SHIS seismic hazard data can be found on the J-SHIS website ([EN](https://www.j-shis.bosai.go.jp/en/), [JP](https://www.j-shis.bosai.go.jp/)).
@@ -53,14 +53,14 @@ Mathematics, Philadelphia, USA.
 
 * **Modified Mercalli Intensity Scale (MMI):**
   * This tool can evaluate instrumental seismic intensity following the Modified Mercalli Intensity (MMI) scale methodology, based on the prediction equations by Atkinson et al. (2014). Technical details on the MMI scale can be found on the [USGS website](https://www.usgs.gov/programs/earthquake-hazards/modified-mercalli-intensity-scale).
-  * Atkinson, G.M., Worden, C.B., Wald D.J. (2014). Intensity Prediction Equations for North America. Bulletin of the Seismological Society of America, 104 (6): 3084–3093. [https://doi.org/10.1785/0120140178](https://doi.org/10.1785/0120140178)
+  * Atkinson, G.M., Worden, C.B., and Wald D.J. (2014). Intensity Prediction Equations for North America. Bulletin of the Seismological Society of America, 104 (6): 3084–3093. [https://doi.org/10.1785/0120140178](https://doi.org/10.1785/0120140178)
 
 ### European Union (EU)
 
 * **European Macroseismic Scale (EMS-98):**
   * This tool can also evaluate instrumental seismic intensity following the European Macroseismic (EMS-98) scale methodology, based on the PGV prediction equations by Bindi et al. (2011) and PGV-to-Intensity conversion by Faenza and Michelini (2010). Technical details on the European Macroseismic (EMS-98) scale can be found on the [GFZ website](https://www.gfz.de/en/section/seismic-hazard-and-risk-dynamics/data-products-services/ems-98-european-macroseismic-scale).
-  * Bindi, D., Pacor, F., Luzi, L., Puglia, R., Massa, M., Ameri, G., Paolucci, R. (2011). Ground motion prediction equations derived from the Italian strong motion database. Bulletin of Earthquake Engineering, 9, 1899–1920. [https://doi.org/10.1007/s10518-011-9313-z](https://doi.org/10.1007/s10518-011-9313-z)
-  * Faenza, L., Michelini, A. (2010). Regression analysis of MCS intensity and ground motion parameters in Italy and its application in ShakeMap. Geophysical Journal International, 180 (3), 1138–1152. [https://doi.org/10.1111/j.1365-246X.2009.04467.x](https://doi.org/10.1111/j.1365-246X.2009.04467.x)
+  * Bindi, D., Pacor, F., Luzi, L., Puglia, R., Massa, M., Ameri, G., and Paolucci, R. (2011). Ground motion prediction equations derived from the Italian strong motion database. Bulletin of Earthquake Engineering, 9, 1899–1920. [https://doi.org/10.1007/s10518-011-9313-z](https://doi.org/10.1007/s10518-011-9313-z)
+  * Faenza, L. and Michelini, A. (2010). Regression analysis of MCS intensity and ground motion parameters in Italy and its application in ShakeMap. Geophysical Journal International, 180 (3), 1138–1152. [https://doi.org/10.1111/j.1365-246X.2009.04467.x](https://doi.org/10.1111/j.1365-246X.2009.04467.x)
 
 ## 3 TECHNICAL IMPLEMENTATION
 
