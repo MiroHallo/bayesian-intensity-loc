@@ -1,6 +1,6 @@
 # High-Performance Bayesian earthquake location from seismic intensity
 
-A JAX-accelerated Python framework for seismic source inversion and uncertainty quantification using JMA or MMI or EMS-98 instrumental intensity data (modern and historical intensity observations).
+A JAX-accelerated Python framework for seismic source inversion and uncertainty quantification. It uses instrumental seismic intensity data from Japan, USA, and Europe (both historical and modern intensity observations).
 
 <a href="#cite"><img src="https://img.shields.io/badge/CITE%20AS-grey?style=flat" alt="Cite As"></a>
 [![DATABASE](https://img.shields.io/badge/DATABASE-10.5281%2Fzenodo.19379171-%23007EC6?style=flat)](https://doi.org/10.5281/zenodo.19379171)
@@ -58,7 +58,7 @@ Mathematics, Philadelphia, USA.
 ### European Union (EU)
 
 * **European Macroseismic Scale (EMS-98):**
-  * This tool can also evaluate instrumental seismic intensity following the European Macroseismic (EMS-98) scale methodology, based on the PGV prediction equations by Bindi et al. (2011) and PGV-to-Intensity conversion by Faenza and Michelini (2010). Technical details on the European Macroseismic (EMS-98) scale can be found on the [GFZ website](https://www.gfz.de/en/section/seismic-hazard-and-risk-dynamics/data-products-services/ems-98-european-macroseismic-scale).
+  * This tool can also evaluate instrumental seismic intensity in the European Macroseismic (EMS-98) scale. It is based on the PGV prediction equations by Bindi et al. (2011) and PGV-to-Intensity conversion by Faenza and Michelini (2010). Technical details on the European Macroseismic (EMS-98) scale can be found on the [GFZ website](https://www.gfz.de/en/section/seismic-hazard-and-risk-dynamics/data-products-services/ems-98-european-macroseismic-scale).
   * Bindi, D., Pacor, F., Luzi, L., Puglia, R., Massa, M., Ameri, G., and Paolucci, R. (2011). Ground motion prediction equations derived from the Italian strong motion database. Bulletin of Earthquake Engineering, 9, 1899–1920. [https://doi.org/10.1007/s10518-011-9313-z](https://doi.org/10.1007/s10518-011-9313-z)
   * Faenza, L. and Michelini, A. (2010). Regression analysis of MCS intensity and ground motion parameters in Italy and its application in ShakeMap. Geophysical Journal International, 180 (3), 1138–1152. [https://doi.org/10.1111/j.1365-246X.2009.04467.x](https://doi.org/10.1111/j.1365-246X.2009.04467.x)
 
@@ -78,9 +78,11 @@ The computational engine is engineered for maximum throughput by bypassing stand
 1. `utils/` — Directory containing supporting Python modules and SQL interface
 2. `location_intensity.py` — Main execution script for the Bayesian inversion
 3. `config.py` — Configuration module to define inversion parameters and search area
-4. `plotting.py` — Python module for high-quality visualization of results and PDFs
-5. `INPUT.txt` — Example input file with observed seismic intensity data and V<sub>S30</sub> values
-6. `requirements.txt` — Pip requirements file for automated installation of dependencies
+4. `constants.py` — Module defining constants, intensity scales, and color schemes
+5. `geodata.py` — Module for geographical coordinates preparation and V<sub>S30</sub> handling
+6. `plotting.py` — Module for high-quality visualization of results and PDFs
+7. `INPUT.txt` — Example input file with JMA observed seismic intensity data and V<sub>S30</sub> values
+8. `requirements.txt` — Pip requirements file for automated installation of dependencies
 
 ## 5 REQUIREMENTS
 
@@ -120,7 +122,7 @@ The computation process is monitored, and the tool informs the user in real-time
     Number of stations:    163
     Final 3D matrix (RAM): 0.81 GB
     JAX peak per slice:    0.65 GB
-    Available System RAM:  5.97 GB
+    Available System RAM:  15.97 GB
 [*] SUCCESS: Memory check passed
 [*] Evaluate probability in 3D model space (Parallel-JAX)
     Progress:  30.3%
@@ -194,4 +196,4 @@ If you use this tools suite, please cite both the original database and the soft
 > Hallo, M. (2026). Research Dataset: Optimized Site Parameters Vs30 for Seismic Hazard Analysis in Japan (derived from J-SHIS) (v1.0) [Dataset]. Zenodo. [https://doi.org/10.5281/zenodo.19379171](https://doi.org/10.5281/zenodo.19379171)
 
 ### For the specific software version:
-> Hallo, M. (2026). JAX-accelerated Bayesian earthquake location from seismic intensity (v1.0) [Software]. Zenodo. [https://doi.org/10.5281/zenodo.19603409](https://doi.org/10.5281/zenodo.19603409)
+> Hallo, M. (2026). JAX-accelerated Bayesian earthquake location from seismic intensity (v1.1) [Software]. Zenodo. [https://doi.org/10.5281/zenodo.19603409](https://doi.org/10.5281/zenodo.19603409)

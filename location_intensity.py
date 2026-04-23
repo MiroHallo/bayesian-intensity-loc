@@ -4,9 +4,7 @@
 #
 # Author: Miroslav HALLO, Kyoto University
 # E-mail: hallo.miroslav.2a@kyoto-u.ac.jp
-# Tested with: Python 3.12.3, Jax 0.9.2, Matplotlib 3.10.8, NumPy 2.4.4,
-#              Pandas 3.0.2, GeoPandas 1.1.3, psutil 7.2.2, Requests 2.33.1,
-#              Shapely 2.1.2, SQLAlchemy 2.0.49
+# Tested with: Python 3.12.3, Jax 0.9.2, NumPy 2.4.4, psutil 7.2.2
 # Description: Location of the earthquake epicenter and moment magnitude from
 #              instrumental seismic intensity (historical or modern).
 #              Japan: JMA Seismic Intensity Scale (Shindo), instrumental
@@ -39,24 +37,24 @@
 from datetime import datetime
 from pathlib import Path
 
-import geopandas as gpd
 import jax
 import jax.numpy as jnp
 import numpy as np
-import pandas as pd
 import psutil
-from shapely.geometry import Point
 
 from config import INPUT, ScaleType
-import utils.jshis_sqlite_query as jshis
-import plotting as putil
+from constants import (get_jma_color, get_mmi_color,
+                       JMA_LEGEND, JMA_LEGEND_HIST, MMI_LEGEND)
+from geodata import (load_input_data, prepare_geo, back_to_wgs84, process_vs30)
+from plotting import (plot_slices, plot_marginal_pdf,
+                      plot_misfits, plot_station_map)
 
 
 # =============================================================================
 # FUNCTIONS
 # =============================================================================
 
-# Forward problem - Japan (vectorized over stations, JAX)
+# Forward problem - JMA Shindo (vectorized over stations, JAX)
 @jax.jit
 def forward_jma_intensity(
         mw: float, r: jnp.ndarray, h_top: float, vs30: jnp.ndarray
@@ -93,7 +91,7 @@ def forward_jma_intensity(
 
 
 # -----------------------------------------------------------------------------
-# Forward problem - USA (vectorized over stations, JAX)
+# Forward problem - MMI (vectorized over stations, JAX)
 @jax.jit
 def forward_mmi_intensity(
         mw: float, r: jnp.ndarray, h_top: float, vs30: jnp.ndarray
@@ -113,11 +111,12 @@ def forward_mmi_intensity(
     # Coefficients from Atkinson et al. (2014)
     c1, c2, c3, c4, c5, c6 = 0.309, 1.864, -1.672, -0.00219, 1.77, -0.383
     h_sat = 14.0  # Saturation depth [km]
+    h_top = jnp.maximum(h_sat, h_top)
     v0 = 450.0  # Reference Vs30 [m/s]
     sig_mod = 0.5
 
     # Compute support terms
-    refe = jnp.sqrt(r**2 + jnp.maximum(h_sat, h_top)**2)
+    refe = jnp.sqrt(r**2 + h_top**2)
     b = jnp.maximum(0.0, jnp.log10(refe / 50.0))
     amp_gain = -1.5 * jnp.log10(jnp.maximum(vs30, 150.0) / v0)
 
@@ -129,7 +128,7 @@ def forward_mmi_intensity(
 
 
 # -----------------------------------------------------------------------------
-# Forward problem - EU (vectorized over stations, JAX)
+# Forward problem - EMS-98 (vectorized over stations, JAX)
 @jax.jit
 def forward_ems98_intensity(
         mw: float, r: jnp.ndarray, h_top: float, vs30: jnp.ndarray
@@ -148,13 +147,15 @@ def forward_ems98_intensity(
                float: Model uncertainty 1 sigma.
     """
     # Coefficients for PGV on A-class rock (Bindi et al., 2011; table 5)
-    e1, c1, c2, h, c3 = 2.305, -1.517, 0.326, 7.879, 0.0
+    e1, c1, c2, c3 = 2.305, -1.517, 0.326, 0.0
+    h = 7.879  # Saturation depth [km]
+    h_top = jnp.maximum(h, h_top)
     b1, b2 = 0.236, -0.00686
     r_ref, m_ref, m_h, b3 = 1.0, 5.0, 6.75, 0.0
     sig_mod_pgv = 0.332
 
     # Compute support terms
-    refe = jnp.sqrt(r**2 + jnp.maximum(h, h_top)**2)
+    refe = jnp.sqrt(r**2 + h_top**2)
     fd = (c1 + c2 * (mw - m_ref)) * jnp.log10(refe/r_ref) - c3 * (refe-r_ref)
     fm = jnp.where(
         mw <= m_h,
@@ -292,89 +293,6 @@ def check_memory_requirements(gx: jnp.ndarray, gy: jnp.ndarray, gz:
 
 
 # -----------------------------------------------------------------------------
-# Process vs30 values in the geopandas table
-def process_vs30(data: gpd.GeoDataFrame, input_path: Path) -> gpd.GeoDataFrame:
-    """
-    Checks for missing Vs30 values (<= 0) and attempts to fill them using a SQL
-    database. Saves an updated input file if any values were changed.
-
-    Args:
-        data (gpd.GeoDataFrame): Input geopandas table with 'vs30' 'lon' 'lat'.
-        input_path (Path): Full path of the input file.
-    Returns:
-        gpd.GeoDataFrame: Updated geopandas table with new Vs30 values.
-    """
-    bad_mask = data['vs30'] <= 0
-    n_bad = bad_mask.sum()
-
-    if n_bad == 0:
-        return data
-
-    print(f"[*] Found {n_bad} invalid Vs30 values")
-    for idx, row in data[bad_mask].iterrows():
-        data.at[idx, 'vs30'] = 350.0
-
-    # SQLite database file
-    print("[*] Check or download SQLite database")
-    jshis.download_database(jshis.DB_FILE)
-
-    # SQL engine
-    print("[*] Initialize SQL engine")
-    engine = jshis.init_sql_engine(jshis.DB_FILE)
-    if not engine:
-        print("[!] SQL engine could not be initialized!")
-        return data
-
-    # Extract Vs30 data from the SQL database
-    print("[*] Extracting missing Vs30 data from SQL")
-    for idx, row in data[bad_mask].iterrows():
-        input_params = {
-            'ref_lon': row['lon'],
-            'ref_lat': row['lat'],
-            'delta': jshis.DELTA,
-        }
-        res = jshis.get_vs30(input_params, engine)
-        if res:
-            data.at[idx, 'vs30'] = res.vs30
-        else:
-            print(f"[!] No SQL data found at {row['lon']}, {row['lat']}")
-
-    if hasattr(engine, 'dispose'):
-        engine.dispose()
-
-    print("[+] SUCCESS: Vs30 values assigned from SQL database")
-
-    # Save the updated table
-    output_path = input_path.with_name(f"UPDATED_{input_path.name}")
-    try:
-        export_cols = ['n', 'lat', 'lon', 'int', 'sig', 'vs30', 'text']
-        out_df = pd.DataFrame(data[export_cols])
-        out_df['n'] = out_df['n'].astype(int)
-        header_text = (
-            "# UPDATED INPUT FILE WITH VS30 EXTRACTED FROM J-SHIS\n"
-            "#  N  Latitude  Longitude  Int  Sigma  Vs30  Note\n"
-        )
-        out_format = {
-            'n': '{:>4d}'.format,
-            'lat': '{:9.5f}'.format,
-            'lon': '{:10.5f}'.format,
-            'int': '{:5.2f}'.format,
-            'sig': '{:5.2f}'.format,
-            'vs30': '{:6.1f}'.format,
-            'text': '{:<}'.format,
-        }
-        with open(output_path, 'w', encoding='utf-8') as f:
-            f.write(header_text)
-            f.write(out_df.to_string(header=False, index=False,
-                                     formatters=out_format, justify='left'))
-        print(f"[+] SUCCESS: Updated file saved to: {output_path}")
-    except Exception as e:
-        print(f"[!] ERROR saving updated file: {e}")
-
-    return data
-
-
-# -----------------------------------------------------------------------------
 # Main function
 def main() -> None:
     """
@@ -402,64 +320,31 @@ def main() -> None:
     outfile = f"{timestamp}_loc"
 
     # -------------------------------------------
-    # Prepare input dictionary from the text file
+    # Prepare input data from the text file
     print("[*] Read input file")
-    input_path = Path(INPUT.input_file)
-    if not input_path.is_file():
-        print(f"[!] ERROR: Input file '{INPUT.input_file}' not found!")
-        return
     try:
-        inp_data = pd.read_csv(
-            input_path, sep=r'\s+', comment='#', header=None,
-            names=['n', 'lat', 'lon', 'int', 'sig', 'vs30', 'text'],
-            usecols=[0, 1, 2, 3, 4, 5, 6])
-        # Check if all have numeric values
-        numeric_cols = ['lat', 'lon', 'int', 'sig', 'vs30']
-        for col in numeric_cols:
-            if not pd.api.types.is_numeric_dtype(inp_data[col]):
-                inp_data[col] = pd.to_numeric(inp_data[col], errors='coerce')
-        if inp_data[numeric_cols].isna().any().any():
-            print("[!] ERROR: Non-numeric values or missing data found!")
-            return
-        # Check if sig > 0
-        if not (inp_data['sig'] > 0).all():
-            print("[!] ERROR: Sigma must be positive (> 0).")
-            return
-    except Exception as e:
-        print(f"[!] ERROR reading file: {e}")
+        input_path = Path(INPUT.input_file)
+        inp_data = load_input_data(input_path)
+    except (FileNotFoundError, ValueError, RuntimeError) as e:
+        print(f"[!] ERROR: {e}")
         return
 
     print("[*] Prepare input data")
-    # Convert data to geopandas (WGS84 degrees)
-    data = gpd.GeoDataFrame(
-        inp_data,
-        geometry=gpd.points_from_xy(inp_data['lon'], inp_data['lat']),
-        crs="EPSG:4326",
-    )
-    # Find the best UTM Zone
-    utm_crs = data.estimate_utm_crs()
-    # Reprojects to meters using the UTM Zone
-    data = data.to_crs(utm_crs)
-
-    # Create a GeoSeries for the target location (WGS84 degrees)
-    target_gs = gpd.GeoSeries(
-        [Point(INPUT.ref_lon, INPUT.ref_lat)],
-        crs="EPSG:4326",
-    )
-    # Reprojects to meters and extract the point
-    target_pt = target_gs.to_crs(utm_crs).iloc[0]
-
-    # Calculate relative difference to ref_lon and ref_lat [in km]
-    data['x_km'] = (data.geometry.x - target_pt.x) / 1000.0
-    data['y_km'] = (data.geometry.y - target_pt.y) / 1000.0
+    try:
+        data = prepare_geo(inp_data, INPUT.ref_lon, INPUT.ref_lat)
+    except Exception as e:
+        print(f"[!] ERROR: {e}")
+        return
 
     # Get seismic intensity color scale
-    if INPUT.scale == ScaleType.JMA:  # Japan (JMA Shindo)
-        data['color'] = data.apply(putil.get_jma_color, axis=1)
-    elif INPUT.scale in [ScaleType.MMI, ScaleType.EMS98]:  # USA and EU
-        data['color'] = data.apply(putil.get_mmi_color, axis=1)
+    if INPUT.scale == ScaleType.JMA:  # JMA Shindo
+        data['color'] = data.apply(
+            lambda row: get_jma_color(row['int'], row.get('text')),
+            axis=1
+        )
+    elif INPUT.scale in [ScaleType.MMI, ScaleType.EMS98]:  # MMI/EMS-98
+        data['color'] = data['int'].apply(get_mmi_color)
 
-    # -------------------------------------------
     # Check and Fill Vs30 using the external database
     data = process_vs30(data, input_path)
 
@@ -482,7 +367,11 @@ def main() -> None:
     h_top = jnp.array(INPUT.h_top, dtype=jnp.float32)
 
     # Run memory check
-    check_memory_requirements(gx, gy, gz, x_st)
+    try:
+        check_memory_requirements(gx, gy, gz, x_st)
+    except (MemoryError) as e:
+        print(f"[!] ERROR: {e}")
+        return
 
     # Vectorizing the likelihood function over the 2D grid (x, y)
     # in_axes defines which arguments are mapped (0) and which fixed (None)
@@ -535,12 +424,7 @@ def main() -> None:
     loc_res = [gx[loc_ix], gy[loc_iy], gz[loc_iz]]  # [Easting, Northing, Mw]
 
     # Convert back to WGS84 (Lat/Lon)
-    res_utm_x = target_pt.x + (loc_res[0] * 1000.0)
-    res_utm_y = target_pt.y + (loc_res[1] * 1000.0)
-    res_gs = gpd.GeoSeries([Point(res_utm_x, res_utm_y)],
-                           crs=utm_crs)
-    res_wgs = res_gs.to_crs("EPSG:4326").iloc[0]
-    loc_res_wgs = [res_wgs.y, res_wgs.x, loc_res[2]]  # [Lat, Lon, Mw]
+    loc_res_wgs = back_to_wgs84(loc_res, data)  # [Lat, Lon, Mw]
 
     # -------------------------------------------
     # ML/MAP solution uncertainty (Marginal PDFs and Gaussian Fitting)
@@ -592,12 +476,7 @@ def main() -> None:
     loc_pm = [x_mean, y_mean, mw_mean]  # [Easting, Northing, Mw]
 
     # Convert back to WGS84 (Lat/Lon)
-    pm_utm_x = target_pt.x + (loc_pm[0] * 1000.0)
-    pm_utm_y = target_pt.y + (loc_pm[1] * 1000.0)
-    pm_gs = gpd.GeoSeries([Point(pm_utm_x, pm_utm_y)],
-                          crs=utm_crs)
-    pm_wgs = pm_gs.to_crs("EPSG:4326").iloc[0]
-    loc_pm_wgs = [pm_wgs.y, pm_wgs.x, loc_pm[2]]  # [Lat, Lon, Mw]
+    loc_pm_wgs = back_to_wgs84(loc_pm, data)  # [Lat, Lon, Mw]
 
     # -------------------------------------------
     # Save ML / MAP / PM solutions
@@ -670,19 +549,29 @@ def main() -> None:
     # Plot results
     print("[*] Plot results")
 
+    # Prepare color legend
+    if INPUT.scale == ScaleType.JMA:  # JMA Shindo
+        has_special_flags = data['text'].isin(['e', 'E', 'S']).any()
+        if has_special_flags:
+            legend_levels = JMA_LEGEND_HIST
+        else:
+            legend_levels = JMA_LEGEND
+    elif INPUT.scale in [ScaleType.MMI, ScaleType.EMS98]:  # MMI/EMS-98
+        legend_levels = MMI_LEGEND
+
     output_path = res_dir / f"{outfile}_map.png"
-    putil.plot_station_map(data, loc_res, loc_pm, loc_res_wgs, loc_pm_wgs, gx,
-                           gy, output_path)
+    plot_station_map(data, loc_res, loc_pm, loc_res_wgs, loc_pm_wgs, gx,
+                     gy, legend_levels, output_path)
 
     output_path = res_dir / f"{outfile}_pdf_cross_section.png"
-    putil.plot_slices(pdf_3d, gx, gy, gz, loc_ix, loc_iy, loc_iz, output_path)
+    plot_slices(pdf_3d, gx, gy, gz, loc_ix, loc_iy, loc_iz, output_path)
 
     output_path = res_dir / f"{outfile}_pdf_marginal.png"
-    putil.plot_marginal_pdf(pdf_3d, gx, gy, gz, loc_res, loc_pm, output_path)
+    plot_marginal_pdf(pdf_3d, gx, gy, gz, loc_res, loc_pm, output_path)
 
     output_path = res_dir / f"{outfile}_misfit.png"
     station_colors = np.array(data['color'].tolist())
-    putil.plot_misfits(
+    plot_misfits(
         loc_ml=loc_res,
         x_st=data['x_km'].values,
         y_st=data['y_km'].values,
