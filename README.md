@@ -201,4 +201,4 @@ If you use this tools suite, please cite both the original database and the soft
 > Hallo, M. (2026). Research Dataset: Optimized Site Parameters Vs30 for Seismic Hazard Analysis in Japan (derived from J-SHIS) (v1.0) [Dataset]. Zenodo. [https://doi.org/10.5281/zenodo.19379171](https://doi.org/10.5281/zenodo.19379171)
 
 ### For the specific software version:
-> Hallo, M. (2026). JAX-accelerated Bayesian earthquake location from seismic intensity (v1.1) [Software]. Zenodo. [https://doi.org/10.5281/zenodo.19603409](https://doi.org/10.5281/zenodo.19603409)
+> Hallo, M. (2026). JAX-accelerated Bayesian earthquake location from seismic intensity (v1.2) [Software]. Zenodo. [https://doi.org/10.5281/zenodo.19603409](https://doi.org/10.5281/zenodo.19603409)

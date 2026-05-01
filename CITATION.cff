@@ -7,9 +7,9 @@ authors:
     orcid: "https://orcid.org/0000-0001-5865-7767"
 title: "JAX-accelerated Bayesian earthquake location from seismic intensity"
 abstract: "A JAX-accelerated Python framework for seismic source inversion and uncertainty quantification using instrumental seismic intensity data in Japan, USA, and Europe."
-version: "1.1"
+version: "1.2"
 doi: "10.5281/zenodo.19603409"
-date-released: "2026-04-23"
+date-released: "2026-05-01"
 license: GPL-3.0-or-later
 repository-code: "https://github.com/MiroHallo/bayesian-intensity-loc"
 keywords:
