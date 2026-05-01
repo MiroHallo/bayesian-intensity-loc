@@ -66,7 +66,6 @@ Mathematics, Philadelphia, USA.
 * **Switzerland:**
   * It is based on the PGV prediction equations by Cauzzi et al. (2015) and PGV-to-Intensity conversion by Faenza and Michelini (2010). Technical details can be found on the [SED website](https://www.seismo.ethz.ch/en/knowledge/faq/what-does-ems-98-mean/).
   * Cauzzi, C., Faccioli, E., Vanini, M., and Bianchini, A. (2015). Updated predictive equations for broadband (0.01–10 s) horizontal response spectra and peak ground motions, based on a global dataset of digital acceleration records. Bulletin of Earthquake Engineering, 13(6), 1587–1612. [https://doi.org/10.1007/s10518-014-9685-y](https://doi.org/10.1007/s10518-014-9685-y)
-  * Faenza, L. and Michelini, A. (2010). Regression analysis of MCS intensity and ground motion parameters in Italy and its application in ShakeMap. Geophysical Journal International, 180 (3), 1138–1152. [https://doi.org/10.1111/j.1365-246X.2009.04467.x](https://doi.org/10.1111/j.1365-246X.2009.04467.x)
 
 ## 3 TECHNICAL IMPLEMENTATION
 
