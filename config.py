@@ -13,8 +13,10 @@
 #                     database for sites without Vs30 measurements.
 #              USA: Modified Mercalli Intensity (MMI), instrumental prediction
 #                     by Atkinson et al. (2014) for western North America.
-#              EU: European Macroseismic (EMS-98), instrumental prediction
-#                     by Bindi et al. (2011) and Faenza and Michelini (2010).
+#              EU/Switzerland: European Macroseismic (EMS-98), PGV prediction
+#                     by Bindi et al. (2011) for Mediterranean/Italy or
+#                     by Cauzzi et al. (2015) for Switzerland, and conversion
+#                     to instrumental intensity by Faenza and Michelini (2010).
 #
 # Copyright (C) 2026 Kyoto University
 #
@@ -48,8 +50,9 @@ import numpy as np
 
 class ScaleType(Enum):
     JMA = "jma"      # Japan: JMA Seismic Intensity Scale (Shindo)
-    MMI = "mmi"      # USA: Modified Mercalli Intensity (MMI)
-    EMS98 = "ems98"  # EU: European Macroseismic Scale (EMS-98)
+    MMI = "mmi"      # North America: Modified Mercalli Intensity (MMI)
+    EMS98 = "ems98"  # Mediterranean: European Macroseismic Scale (EMS-98)
+    EMSCH = "emsch"  # Switzerland: European Macroseismic Scale (EMS-98)
 
 
 @dataclass
@@ -61,7 +64,7 @@ class ConfigClass:
         ref_lon, ref_lat: Reference point coordinates [deg].
         h_top: Top depth of the rupture [km].
         grid_x_set, grid_y_set, grid_z_set: Grid (start, step, end) [km].
-        scale: Instrumental Seismic Intensity Scale (jma / mmi / ems98).
+        scale: Instrumental Seismic Intensity Scale (jma / mmi / ems98/ emsch).
         input_file: Path to the input data file.
     """
     ref_lon: float
@@ -157,8 +160,9 @@ INPUT = ConfigClass(
     # Instrumental seismic intensity scale to be used for the computation
     scale='JMA',
           # JMA - Japan: JMA Seismic Intensity Scale (Shindo)
-          # MMI - USA: Modified Mercalli Intensity (MMI)
-          # EMS98 - EU: European Macroseismic Scale (EMS-98)
+          # MMI - North America: Modified Mercalli Intensity (MMI)
+          # EMS98 - Mediterranean: European Macroseismic Scale (EMS-98)
+          # EMSCH - Switzerland: European Macroseismic Scale (EMS-98)
 
     # Path to the ASCII (UTF-8) text file containing input data
     input_file='INPUT.txt',
@@ -188,7 +192,7 @@ INPUT = ConfigClass(
                # [I] 1.0, [II] 2.0, [III] 3.0, [IV] 4.0, [V] 5.0, [VI] 6.0,
                # [VII] 7.0, [VIII] 8.0, [IX] 9.0, [X] 10.0, [XI] 11.0, [XII] 12
                # -----------------------------------------------
-               # *** EU localization ***
+               # *** EU/Switzerland localization ***
                # Instrumental European Macroseismic Scale (EMS-98)
                # [I] 1.0, [II] 2.0, [III] 3.0, [IV] 4.0, [V] 5.0, [VI] 6.0,
                # [VII] 7.0, [VIII] 8.0, [IX] 9.0, [X] 10.0, [XI] 11.0, [XII] 12

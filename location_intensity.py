@@ -13,8 +13,10 @@
 #                     database for sites without Vs30 measurements.
 #              USA: Modified Mercalli Intensity (MMI), instrumental prediction
 #                     by Atkinson et al. (2014) for western North America.
-#              EU: European Macroseismic (EMS-98), instrumental prediction
-#                     by Bindi et al. (2011) and Faenza and Michelini (2010).
+#              EU/Switzerland: European Macroseismic (EMS-98), PGV prediction
+#                     by Bindi et al. (2011) for Mediterranean/Italy or
+#                     by Cauzzi et al. (2015) for Switzerland, and conversion
+#                     to instrumental intensity by Faenza and Michelini (2010).
 #
 # Copyright (C) 2026 Kyoto University
 #
@@ -43,8 +45,8 @@ import numpy as np
 import psutil
 
 from config import INPUT, ScaleType
-from constants import (get_jma_color, get_mmi_color,
-                       JMA_LEGEND, JMA_LEGEND_HIST, MMI_LEGEND)
+from constants import (get_jma_color, get_mmi_color, get_sed_color,
+                       JMA_LEGEND, JMA_LEGEND_HIST, MMI_LEGEND, SED_LEGEND)
 from geodata import (load_input_data, prepare_geo, back_to_wgs84, process_vs30)
 from plotting import (plot_slices, plot_marginal_pdf,
                       plot_misfits, plot_station_map)
@@ -54,7 +56,7 @@ from plotting import (plot_slices, plot_marginal_pdf,
 # FUNCTIONS
 # =============================================================================
 
-# Forward problem - JMA Shindo (vectorized over stations, JAX)
+# Forward problem - JMA Shindo: Japan (vectorized over stations, JAX)
 @jax.jit
 def forward_jma_intensity(
         mw: float, r: jnp.ndarray, h_top: float, vs30: jnp.ndarray
@@ -91,7 +93,7 @@ def forward_jma_intensity(
 
 
 # -----------------------------------------------------------------------------
-# Forward problem - MMI (vectorized over stations, JAX)
+# Forward problem - MMI: North Amerika (vectorized over stations, JAX)
 @jax.jit
 def forward_mmi_intensity(
         mw: float, r: jnp.ndarray, h_top: float, vs30: jnp.ndarray
@@ -128,14 +130,14 @@ def forward_mmi_intensity(
 
 
 # -----------------------------------------------------------------------------
-# Forward problem - EMS-98 (vectorized over stations, JAX)
+# Forward problem - EMS-98: Mediterranean/Italy (vectorized over stations, JAX)
 @jax.jit
 def forward_ems98_intensity(
         mw: float, r: jnp.ndarray, h_top: float, vs30: jnp.ndarray
         ) -> tuple[jnp.ndarray, float]:
     """
-    European Macroseismic Scale (EMS-98) prediction.
-    Based on Bindi et al. (2011) and Faenza and Michelini (2010) conversion.
+    European Macroseismic Scale (EMS-98) prediction (Mediterranean/Italy).
+    Bindi et al. (2011) for PGV and Faenza and Michelini (2010) conversion.
 
     Args:
         mw (float): Moment magnitude.
@@ -181,6 +183,50 @@ def forward_ems98_intensity(
 
 
 # -----------------------------------------------------------------------------
+# Forward problem - EMS-98: Switzerland/SED (vectorized over stations, JAX)
+@jax.jit
+def forward_sed_intensity(
+        mw: float, r: jnp.ndarray, h_top: float, vs30: jnp.ndarray
+        ) -> tuple[jnp.ndarray, float]:
+    """
+    European Macroseismic Scale (EMS-98) prediction (Switzerland/SED).
+    Cauzzi et al. (2015) for PGV and Faenza & Michelini (2010) conversion.
+
+    Args:
+        mw (float): Moment magnitude.
+        r (jnp.ndarray): Distance array (Rrup) [km].
+        h_top (float): Top depth of the rupture [km].
+        vs30 (jnp.ndarray): Vs30 array [m/s].
+    Returns:
+        tuple: jnp.ndarray: Predicted EMS-98 instrumental intensity.
+               float: Model uncertainty 1 sigma.
+    """
+    # PGV Coefficients (Cauzzi et al., 2015)
+    c1, m1, m2, r1, r2, r3 = 0.44222, 0.54822, -0.031947, -2.846, 0.2407, 6.517
+    bv800 = -0.75968
+    v0 = 800.0  # Reference Vs30 [m/s]
+    sig_mod_pgv = 0.326
+
+    # Compute support terms
+    rrup = jnp.sqrt(r**2 + h_top**2)
+    fm = c1 + (m1 * mw) + (m2 * (mw**2))
+    fr = (r1 + (r2 * mw)) * jnp.log10(rrup + r3)
+    fs = bv800 * jnp.log10(jnp.maximum(vs30, 100.0) / v0)
+
+    # log10(PGV) [cm/s] from Cauzzi et al. (2015)
+    log_pgv = fm + fr + fs
+
+    # Convert log10(PGV) to EMS-98 (Faenza and Michelini, 2010)
+    intensity = 5.11 + 2.35 * log_pgv
+    sig_mod_int = 0.35
+
+    # Uncertainty (combined GMPE + GMICE)
+    sig_mod = jnp.sqrt(sig_mod_pgv**2 + sig_mod_int**2)
+
+    return intensity, sig_mod
+
+
+# -----------------------------------------------------------------------------
 # Likelihood function (one point of the grid, JAX)
 @jax.jit
 def eval_log_L(
@@ -212,8 +258,10 @@ def eval_log_L(
         int_syn, sig_mod = forward_jma_intensity(mw_src, r, h_top, vs30_st)
     elif INPUT.scale == ScaleType.MMI:  # USA (Modified Mercalli)
         int_syn, sig_mod = forward_mmi_intensity(mw_src, r, h_top, vs30_st)
-    elif INPUT.scale == ScaleType.EMS98:  # EU (European Macroseismic EMS-98)
+    elif INPUT.scale == ScaleType.EMS98:  # Mediterranean/Italy (EMS-98)
         int_syn, sig_mod = forward_ems98_intensity(mw_src, r, h_top, vs30_st)
+    elif INPUT.scale == ScaleType.EMSCH:  # Switzerland (EMS-98)
+        int_syn, sig_mod = forward_sed_intensity(mw_src, r, h_top, vs30_st)
 
     # Combined variance (sum of squares of independent uncertainties)
     variance = sig_obs**2 + sig_mod**2 + 1e-9
@@ -342,8 +390,10 @@ def main() -> None:
             lambda row: get_jma_color(row['int'], row.get('text')),
             axis=1
         )
-    elif INPUT.scale in [ScaleType.MMI, ScaleType.EMS98]:  # MMI/EMS-98
+    elif INPUT.scale in [ScaleType.MMI, ScaleType.EMS98]:  # USGS ShakeMap
         data['color'] = data['int'].apply(get_mmi_color)
+    elif INPUT.scale == ScaleType.EMSCH:  # SED (Switzerland)
+        data['color'] = data['int'].apply(get_sed_color)
 
     # Check and Fill Vs30 using the external database
     data = process_vs30(data, input_path)
@@ -535,8 +585,10 @@ def main() -> None:
         int_synth, _ = forward_jma_intensity(mw_bes, r_bes, h_top, vs30_st)
     elif INPUT.scale == ScaleType.MMI:  # USA (Modified Mercalli)
         int_synth, _ = forward_mmi_intensity(mw_bes, r_bes, h_top, vs30_st)
-    elif INPUT.scale == ScaleType.EMS98:  # EU (European Macroseismic EMS-98)
+    elif INPUT.scale == ScaleType.EMS98:  # Mediterranean/Italy (EMS-98)
         int_synth, _ = forward_ems98_intensity(mw_bes, r_bes, h_top, vs30_st)
+    elif INPUT.scale == ScaleType.EMSCH:  # Switzerland (EMS-98)
+        int_synth, _ = forward_sed_intensity(mw_bes, r_bes, h_top, vs30_st)
 
     # Compute misfit (Observed - Synthetic)
     int_misfit = int_obs - int_synth
@@ -556,8 +608,10 @@ def main() -> None:
             legend_levels = JMA_LEGEND_HIST
         else:
             legend_levels = JMA_LEGEND
-    elif INPUT.scale in [ScaleType.MMI, ScaleType.EMS98]:  # MMI/EMS-98
+    elif INPUT.scale in [ScaleType.MMI, ScaleType.EMS98]:  # USGS ShakeMap
         legend_levels = MMI_LEGEND
+    elif INPUT.scale == ScaleType.EMSCH:  # SED (Switzerland)
+        legend_levels = SED_LEGEND
 
     output_path = res_dir / f"{outfile}_map.png"
     plot_station_map(data, loc_res, loc_pm, loc_res_wgs, loc_pm_wgs, gx,

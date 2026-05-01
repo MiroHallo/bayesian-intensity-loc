@@ -55,11 +55,14 @@ Mathematics, Philadelphia, USA.
   * This tool can evaluate instrumental seismic intensity following the Modified Mercalli Intensity (MMI) scale methodology, based on the prediction equations by Atkinson et al. (2014). Technical details on the MMI scale can be found on the [USGS website](https://www.usgs.gov/programs/earthquake-hazards/modified-mercalli-intensity-scale).
   * Atkinson, G.M., Worden, C.B., and Wald D.J. (2014). Intensity Prediction Equations for North America. Bulletin of the Seismological Society of America, 104 (6): 3084–3093. [https://doi.org/10.1785/0120140178](https://doi.org/10.1785/0120140178)
 
-### European Union (EU)
+### Europe
 
 * **European Macroseismic Scale (EMS-98):**
-  * This tool can also evaluate instrumental seismic intensity in the European Macroseismic (EMS-98) scale. It is based on the PGV prediction equations by Bindi et al. (2011) and PGV-to-Intensity conversion by Faenza and Michelini (2010). Technical details on the European Macroseismic (EMS-98) scale can be found on the [GFZ website](https://www.gfz.de/en/section/seismic-hazard-and-risk-dynamics/data-products-services/ems-98-european-macroseismic-scale).
+  * This tool can also evaluate instrumental seismic intensity in the European Macroseismic (EMS-98) scale. Technical details on the European Macroseismic (EMS-98) scale can be found on the [GFZ website](https://www.gfz.de/en/section/seismic-hazard-and-risk-dynamics/data-products-services/ems-98-european-macroseismic-scale).
+  * **Mediterranean/Italy**: It is based on the PGV prediction equations by Bindi et al. (2011) and PGV-to-Intensity conversion by Faenza and Michelini (2010).
+  * **Switzerland**: It is based on the PGV prediction equations by Cauzzi et al. (2015) and PGV-to-Intensity conversion by Faenza and Michelini (2010). Technical details can be found on the [SED website](https://www.seismo.ethz.ch/en/knowledge/faq/what-does-ems-98-mean/).
   * Bindi, D., Pacor, F., Luzi, L., Puglia, R., Massa, M., Ameri, G., and Paolucci, R. (2011). Ground motion prediction equations derived from the Italian strong motion database. Bulletin of Earthquake Engineering, 9, 1899–1920. [https://doi.org/10.1007/s10518-011-9313-z](https://doi.org/10.1007/s10518-011-9313-z)
+  * Cauzzi, C., Faccioli, E., Vanini, M., and Bianchini, A. (2015). Updated predictive equations for broadband (0.01–10 s) horizontal response spectra and peak ground motions, based on a global dataset of digital acceleration records. Bulletin of Earthquake Engineering, 13(6), 1587–1612. [https://doi.org/10.1007/s10518-014-9685-y](https://doi.org/10.1007/s10518-014-9685-y)
   * Faenza, L. and Michelini, A. (2010). Regression analysis of MCS intensity and ground motion parameters in Italy and its application in ShakeMap. Geophysical Journal International, 180 (3), 1138–1152. [https://doi.org/10.1111/j.1365-246X.2009.04467.x](https://doi.org/10.1111/j.1365-246X.2009.04467.x)
 
 ## 3 TECHNICAL IMPLEMENTATION

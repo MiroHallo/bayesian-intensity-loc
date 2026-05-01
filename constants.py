@@ -13,8 +13,10 @@
 #                     database for sites without Vs30 measurements.
 #              USA: Modified Mercalli Intensity (MMI), instrumental prediction
 #                     by Atkinson et al. (2014) for western North America.
-#              EU: European Macroseismic (EMS-98), instrumental prediction
-#                     by Bindi et al. (2011) and Faenza and Michelini (2010).
+#              EU/Switzerland: European Macroseismic (EMS-98), PGV prediction
+#                     by Bindi et al. (2011) for Mediterranean/Italy or
+#                     by Cauzzi et al. (2015) for Switzerland, and conversion
+#                     to instrumental intensity by Faenza and Michelini (2010).
 #
 # Copyright (C) 2026 Kyoto University
 #
@@ -44,15 +46,15 @@ from typing import List, Union, Optional
 
 # JMA intensity scale colors (RGB)
 JMA_COLORS = SimpleNamespace(
-    INT_7=[153/255, 51/255, 153/255],
-    INT_6P=[153/255, 0/255, 0/255],
-    INT_6M=[255/255, 51/255, 0/255],
-    INT_5P=[255/255, 140/255, 0/255],
-    INT_5M=[255/255, 255/255, 0/255],
-    INT_4=[255/255, 250/255, 205/255],
-    INT_3=[58/255, 95/255, 205/255],
-    INT_2=[135/255, 206/255, 250/255],
-    INT_1=[200/255, 250/255, 255/255],
+    INT_7=[180/255, 0/255, 104/255],
+    INT_6P=[165/255, 0/255, 33/255],
+    INT_6M=[255/255, 40/255, 0/255],
+    INT_5P=[255/255, 153/255, 0/255],
+    INT_5M=[255/255, 230/255, 0/255],
+    INT_4=[250/255, 230/255, 150/255],
+    INT_3=[0/255, 65/255, 255/255],
+    INT_2=[0/255, 170/255, 255/255],
+    INT_1=[242/255, 242/255, 255/255],
 )
 
 # Historical JMA intensity scale colors (RGB)
@@ -62,18 +64,31 @@ JMA_COLORS_HIST = SimpleNamespace(
     INT_e=[135/255, 206/255, 250/255],
 )
 
-# USGS ShakeMap MMI colors (RGB)
+# USGS ShakeMap MMI/EMS-98 colors (RGB)
 MMI_COLORS = SimpleNamespace(
-    I=[1.0, 1.0, 1.0],
-    II=[0.75, 0.85, 1.0],
-    III=[0.63, 0.82, 1.0],
-    IV=[0.5, 1.0, 1.0],
-    V=[0.5, 1.0, 0.5],
-    VI=[1.0, 1.0, 0.0],
-    VII=[1.0, 0.67, 0.0],
-    VIII=[1.0, 0.0, 0.0],
-    IX=[0.75, 0.0, 0.0],
-    X=[0.5, 0.0, 0.0],
+    I=[255/255, 255/255, 255/255],
+    II=[191/255, 204/255, 255/255],
+    III=[160/255, 230/255, 255/255],
+    IV=[128/255, 255/255, 255/255],
+    V=[122/255, 255/255, 147/255],
+    VI=[255/255, 255/255, 0/255],
+    VII=[255/255, 200/255, 0/255],
+    VIII=[255/255, 145/255, 0/255],
+    IX=[255/255, 0/255, 0/255],
+    X=[128/255, 0/255, 0/255],
+)
+
+# Swiss SED EMS-98 colors (RGB)
+SED_COLORS = SimpleNamespace(
+    I=[255/255, 255/255, 255/255],
+    II=[191/255, 204/255, 255/255],
+    III=[160/255, 230/255, 255/255],
+    IV=[165/255, 245/255, 122/255],
+    V=[255/255, 255/255, 0/255],
+    VI=[255/255, 153/255, 0/255],
+    VII=[255/255, 0/255, 0/255],
+    VIII=[180/255, 0/255, 0/255],
+    IX=[120/255, 0/255, 0/255],
 )
 
 # Other colors (RGB)
@@ -83,32 +98,38 @@ OTHER_COLORS = SimpleNamespace(
 
 # Legend for JMA scale (standard)
 JMA_LEGEND = [
-    ("Int 7", JMA_COLORS.INT_7),
-    ("Int 6+", JMA_COLORS.INT_6P),
-    ("Int 6-", JMA_COLORS.INT_6M),
-    ("Int 5+", JMA_COLORS.INT_5P),
-    ("Int 5-", JMA_COLORS.INT_5M),
-    ("Int 4", JMA_COLORS.INT_4),
-    ("Int 3", JMA_COLORS.INT_3),
-    ("Int 2", JMA_COLORS.INT_2),
-    ("Int 1", JMA_COLORS.INT_1),
+    ("Intensity", None),
+    ("(JMA Shindo)", None),
+    ("7", JMA_COLORS.INT_7),
+    ("6+", JMA_COLORS.INT_6P),
+    ("6-", JMA_COLORS.INT_6M),
+    ("5+", JMA_COLORS.INT_5P),
+    ("5-", JMA_COLORS.INT_5M),
+    ("4", JMA_COLORS.INT_4),
+    ("3", JMA_COLORS.INT_3),
+    ("2", JMA_COLORS.INT_2),
+    ("1", JMA_COLORS.INT_1),
 ]
 
 # Legend for JMA scale (historical)
 JMA_LEGEND_HIST = [
-    ("Int 7", JMA_COLORS.INT_7),
-    ("Int 6+", JMA_COLORS.INT_6P),
-    ("Int 6-", JMA_COLORS.INT_6M),
-    ("Int 5+", JMA_COLORS.INT_5P),
-    ("Int 5-", JMA_COLORS.INT_5M),
-    ("Int 4", JMA_COLORS.INT_4),
+    ("Intensity", None),
+    ("(JMA Shindo)", None),
+    ("7", JMA_COLORS.INT_7),
+    ("6+", JMA_COLORS.INT_6P),
+    ("6-", JMA_COLORS.INT_6M),
+    ("5+", JMA_COLORS.INT_5P),
+    ("5-", JMA_COLORS.INT_5M),
+    ("4", JMA_COLORS.INT_4),
     ("S (hist)", JMA_COLORS_HIST.INT_S),
     ("E (hist)", JMA_COLORS_HIST.INT_E),
     ("e (hist)", JMA_COLORS_HIST.INT_e),
 ]
 
-# Legend for MMI/EMS-98 scale
+# Legend for ShakeMap MMI/EMS-98 scale
 MMI_LEGEND = [
+    ("Intensity", None),
+    ("(MMI/EMS-98)", None),
     ("X+", MMI_COLORS.X),
     ("IX", MMI_COLORS.IX),
     ("VIII", MMI_COLORS.VIII),
@@ -119,6 +140,21 @@ MMI_LEGEND = [
     ("III", MMI_COLORS.III),
     ("II", MMI_COLORS.II),
     ("I", MMI_COLORS.I),
+]
+
+# Legend for SED EMS-98 scale
+SED_LEGEND = [
+    ("Intensity", None),
+    ("(EMS-98, CH)", None),
+    ("IX+", SED_COLORS.IX),
+    ("VIII", SED_COLORS.VIII),
+    ("VII", SED_COLORS.VII),
+    ("VI", SED_COLORS.VI),
+    ("V", SED_COLORS.V),
+    ("IV", SED_COLORS.IV),
+    ("III", SED_COLORS.III),
+    ("II", SED_COLORS.II),
+    ("I", SED_COLORS.I),
 ]
 
 
@@ -183,13 +219,13 @@ def get_jma_color(val: Union[float, int, str, None],
 
 
 # -----------------------------------------------------------------------------
-# Get MMI/EMS-98 intensity RGB color
+# Get ShakeMap MMI/EMS-98 intensity RGB color
 def get_mmi_color(val: Union[float, int, str, None]) -> List[float]:
     """
-    Get RGB color for the MMI intensity based on USGS ShakeMap standards.
+    Get RGB color for MMI/EMS-98 intensity based on USGS ShakeMap standards.
 
     Args:
-        val: MMI intensity value or None.
+        val: MMI/EMS-98 intensity value or None.
     Returns:
         List[float]: A list of 3 floats [R, G, B] in range 0.0 to 1.0.
     """
@@ -222,6 +258,51 @@ def get_mmi_color(val: Union[float, int, str, None]) -> List[float]:
             color = MMI_COLORS.II
         else:
             color = MMI_COLORS.I
+
+        return color
+
+    except (ValueError, TypeError):
+        return OTHER_COLORS.NAN
+
+
+# -----------------------------------------------------------------------------
+# Get SED EMS-98 intensity RGB color
+def get_sed_color(val: Union[float, int, str, None]) -> List[float]:
+    """
+    Get RGB color for the EMS-98 intensity based on SED standards.
+
+    Args:
+        val: EMS-98 intensity value or None.
+    Returns:
+        List[float]: A list of 3 floats [R, G, B] in range 0.0 to 1.0.
+    """
+    try:
+        if val is None:
+            return OTHER_COLORS.NAN
+
+        v = float(val)
+        if v != v:  # NaN
+            return OTHER_COLORS.NAN
+
+        # SED EMS-98 intensity scale
+        if v >= 8.5:
+            color = SED_COLORS.IX
+        elif v >= 7.5:
+            color = SED_COLORS.VIII
+        elif v >= 6.5:
+            color = SED_COLORS.VII
+        elif v >= 5.5:
+            color = SED_COLORS.VI
+        elif v >= 4.5:
+            color = SED_COLORS.V
+        elif v >= 3.5:
+            color = SED_COLORS.IV
+        elif v >= 2.5:
+            color = SED_COLORS.III
+        elif v >= 1.5:
+            color = SED_COLORS.II
+        else:
+            color = SED_COLORS.I
 
         return color
 

@@ -14,8 +14,10 @@
 #                     database for sites without Vs30 measurements.
 #              USA: Modified Mercalli Intensity (MMI), instrumental prediction
 #                     by Atkinson et al. (2014) for western North America.
-#              EU: European Macroseismic (EMS-98), instrumental prediction
-#                     by Bindi et al. (2011) and Faenza and Michelini (2010).
+#              EU/Switzerland: European Macroseismic (EMS-98), PGV prediction
+#                     by Bindi et al. (2011) for Mediterranean/Italy or
+#                     by Cauzzi et al. (2015) for Switzerland, and conversion
+#                     to instrumental intensity by Faenza and Michelini (2010).
 #
 # Copyright (C) 2026 Kyoto University
 #
