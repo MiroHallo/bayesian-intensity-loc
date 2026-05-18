@@ -108,6 +108,9 @@ pip install -r requirements.txt
 3. Execute the inversion: `python location_intensity.py`
 4. Check the `results` directory for output figures and the summary text file
 
+### Server Execution
+If you run scripts on a server without a graphical user interface (e.g., Linux cluster, Docker container, or cloud instance), set `export MPLBACKEND=Agg` (Linux)  or `$env:MPLBACKEND="Agg"` (Windows) before execution
+
 ## 7 EXAMPLE OUTPUT
 
 The computation process is monitored, and the tool informs the user in real-time about the progress:
