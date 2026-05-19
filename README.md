@@ -105,7 +105,7 @@ pip install -r requirements.txt
 
 1. Prepare your `INPUT.txt` input file (see the detailed format in the comments of `config.py`)
 2. Set up the search area and inversion parameters in the `config.py` file
-3. Execute the inversion: `python location_intensity.py`
+3. Execute the inversion: `python3 location_intensity.py`
 4. Check the `results` directory for output figures and the summary text file
 
 ### Server Execution
