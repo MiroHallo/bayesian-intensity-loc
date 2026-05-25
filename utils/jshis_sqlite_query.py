@@ -30,6 +30,7 @@
 
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Optional
 
 import pandas as pd
 import geopandas as gpd
@@ -79,7 +80,7 @@ DELTA = 0.02
 # =============================================================================
 
 # Initialize SQL (SQLite) engine
-def init_sql_engine(db_file: str) -> Engine | None:
+def init_sql_engine(db_file: str) -> Optional[Engine]:
     """
     Initialize SQL (SQLite) engine in read-only mode.
 
@@ -174,7 +175,7 @@ def download_database(db_file: str) -> None:
 
 # -----------------------------------------------------------------------------
 # Get Vs30 from SQL database
-def get_vs30(input_params: dict, engine: Engine) -> Vs30Class | None:
+def get_vs30(input_params: dict, engine: Engine) -> Optional[Vs30Class]:
     """
     Extract Vs30 data from SQL database.
 
