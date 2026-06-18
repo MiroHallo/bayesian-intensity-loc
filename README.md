@@ -96,11 +96,13 @@ Python: Version 3.12 or higher
   
 Libraries: jax, numpy, matplotlib, pandas, geopandas, sqlalchemy, requests, shapely, psutil
 
-Install dependencies via pip:
+Install dependencies via pip  (CPU version):
 
 ```bash
 pip install -r requirements.txt
 ```
+
+Install dependencies via pip  (GPU version):
 
 ```bash
 pip install -r requirements_cuda.txt
