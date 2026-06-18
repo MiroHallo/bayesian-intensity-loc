@@ -87,7 +87,8 @@ The computational engine is engineered for maximum throughput by bypassing stand
 5. `geodata.py` — Module for geographical coordinates preparation and V<sub>S30</sub> handling
 6. `plotting.py` — Module for high-quality visualization of results and PDFs
 7. `INPUT.txt` — Example input file with JMA observed seismic intensity data and V<sub>S30</sub> values
-8. `requirements.txt` — Pip requirements file for automated installation of dependencies
+8. `requirements.txt` — Pip requirements file for automated installation of dependencies (CPU version)
+9. `requirements_cuda.txt` — Pip requirements file for automated installation of dependencies (GPU version)
 
 ## 5 REQUIREMENTS
 
@@ -99,6 +100,10 @@ Install dependencies via pip:
 
 ```bash
 pip install -r requirements.txt
+```
+
+```bash
+pip install -r requirements_cuda.txt
 ```
 
 ## 6 USAGE
