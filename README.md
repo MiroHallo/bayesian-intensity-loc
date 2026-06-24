@@ -49,7 +49,6 @@ Mathematics, Philadelphia, USA.
   * The database is a processed subset (derivative research work) of the J-SHIS seismic hazard data from the National Research Institute for Earth Science and Disaster Resilience (NIED). Technical details on the J-SHIS seismic hazard data can be found on the J-SHIS website ([EN](https://www.j-shis.bosai.go.jp/en/), [JP](https://www.j-shis.bosai.go.jp/)).
   * Hallo, M. (2026). Research Dataset: Optimized Site Parameters Vs30 for Seismic Hazard Analysis in Japan (derived from J-SHIS) (v1.0) [Dataset]. Zenodo. [https://doi.org/10.5281/zenodo.19379171](https://doi.org/10.5281/zenodo.19379171)
   * Wakamatsu, K., Matsuoka, M. (2013). Nationwide 7.5-arc-second Japan engineering geomorphologic classification map and Vs30 zoning. Journal of Disaster Research 8(5), 904–911. [https://doi.org/10.20965/jdr.2013.p0904](https://doi.org/10.20965/jdr.2013.p0904)
-  * Wakamatsu, K., Matsuoka, M. (2020). Update of the nationwide 7.5-arc-second Japan engineering geomorphologic classification map and Vs30 zoning. Bulletin of Japan Association for Earthquake Engineering 40, 24–27 (in Japanese).
 
 ### North America (USA)
 
