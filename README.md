@@ -210,5 +210,7 @@ If you use this tools suite, please cite both the original database and the soft
 ### For the V<sub>S30</sub> database (Japan):
 > Hallo, M. (2026). Research Dataset: Optimized Site Parameters Vs30 for Seismic Hazard Analysis in Japan (derived from J-SHIS) (v1.0) [Dataset]. Zenodo. [https://doi.org/10.5281/zenodo.19379171](https://doi.org/10.5281/zenodo.19379171)
 
+> Wakamatsu, K., Matsuoka, M. (2013). Nationwide 7.5-arc-second Japan engineering geomorphologic classification map and Vs30 zoning. Journal of Disaster Research 8(5), 904–911. [https://doi.org/10.20965/jdr.2013.p0904](https://doi.org/10.20965/jdr.2013.p0904)
+
 ### For the specific software version:
 > Hallo, M. (2026). JAX-accelerated Bayesian earthquake location from seismic intensity (v1.2.1) [Software]. Zenodo. [https://doi.org/10.5281/zenodo.19603409](https://doi.org/10.5281/zenodo.19603409)
