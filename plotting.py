@@ -135,7 +135,7 @@ def plot_slices(pdf_3d: np.ndarray, gx: jnp.ndarray, gy: jnp.ndarray,
     # Colorbar
     cbar_ax = fig.add_axes([pos2.x0, pos3.y0 + 0.05, pos2.width * 0.8, 0.02])
     cb = fig.colorbar(im1, cax=cbar_ax, orientation='horizontal')
-    cb.set_label('Probability')
+    cb.set_label('Probability Mass')
     cb.formatter = ticker.ScalarFormatter(useMathText=True)
     cb.formatter.set_scientific(True)
     cb.formatter.set_powerlimits((0, 0))
@@ -166,11 +166,15 @@ def plot_marginal_pdf(pdf_3d: np.ndarray, gx: np.ndarray, gy: np.ndarray,
         None.
     """
     # Compute marginal PDF
-    xy_2d = np.sum(pdf_3d, axis=2).T   # Sum over Mw
-    xz_2d = np.sum(pdf_3d, axis=1).T   # Sum over Northing
-    yz_2d = np.sum(pdf_3d, axis=0)     # Sum over Easting
+    xy_2d = np.sum(pdf_3d, axis=2).T  # Sum over Mw
+    xz_2d = np.sum(pdf_3d, axis=1).T  # Sum over Northing
+    yz_2d = np.sum(pdf_3d, axis=0)    # Sum over Easting
+    # Normalization of PDF to true density (dx*dy*dz)
+    xy_2d = xy_2d / np.max(xy_2d)
+    xz_2d = xz_2d / np.max(xz_2d)
+    yz_2d = yz_2d / np.max(yz_2d)
     # Max marginal PDF
-    max_p = np.max([np.max(xy_2d), np.max(xz_2d), np.max(yz_2d)])
+    max_p = 1.0
 
     # Create figure
     plt.rcParams.update({
@@ -247,7 +251,7 @@ def plot_marginal_pdf(pdf_3d: np.ndarray, gx: np.ndarray, gy: np.ndarray,
     # Colorbar
     cbar_ax = fig.add_axes([pos2.x0, pos3.y0 + 0.05, pos2.width * 0.8, 0.02])
     cb = fig.colorbar(im1, cax=cbar_ax, orientation='horizontal')
-    cb.set_label('Marginal Probability')
+    cb.set_label('Relative Marginal Probability Density')
     cb.formatter = ticker.ScalarFormatter(useMathText=True)
     cb.formatter.set_scientific(True)
     cb.formatter.set_powerlimits((0, 0))
@@ -261,8 +265,8 @@ def plot_marginal_pdf(pdf_3d: np.ndarray, gx: np.ndarray, gy: np.ndarray,
 # -----------------------------------------------------------------------------
 # Plot data misfits
 def plot_misfits(loc_ml: List[float], x_st: np.ndarray, y_st: np.ndarray,
-                 i_misfit: np.ndarray, i_colors: np.ndarray, output_path
-                 ) -> None:
+                 i_misfit: np.ndarray, i_colors: np.ndarray, output_path: Path,
+                 s_radius: float) -> None:
     """
     Plots the intensity data misfits.
 
@@ -272,11 +276,13 @@ def plot_misfits(loc_ml: List[float], x_st: np.ndarray, y_st: np.ndarray,
         i_misfit (np.ndarray): Array of residuals (observed - synthetic).
         i_colors (np.ndarray): RGB colors for all station.
         output_path (Path): Full path for the output figure.
+        s_radius (float): Radius of the source [km].
     Returns:
         None.
     """
     # Prepare epicentral distances
-    r0 = np.sqrt((loc_ml[0] - x_st)**2 + (loc_ml[1] - y_st)**2)
+    r0_true = np.sqrt((loc_ml[0] - x_st)**2 + (loc_ml[1] - y_st)**2)
+    r0 = np.maximum(r0_true - s_radius, 0.0)
 
     # Create figure
     plt.rcParams.update({
@@ -289,23 +295,49 @@ def plot_misfits(loc_ml: List[float], x_st: np.ndarray, y_st: np.ndarray,
     fig, ax = plt.subplots(figsize=(8, 5), facecolor='w')
     ax.scatter(r0, i_misfit, c=i_colors, s=50, edgecolors='k',
                linewidths=0.5, zorder=3)
-    ax.set_xscale('log')
+    ax.set_xscale('symlog', linthresh=10.0)
+    major_ticks = [0, 10, 100, 1000]
+    ax.set_xticks(major_ticks)
+    minor_ticks = []
+    minor_ticks.extend(range(1, 10))
+    minor_ticks.extend([10 * i for i in range(2, 10)])
+    minor_ticks.extend([100 * i for i in range(2, 10)])
+    ax.set_xticks(minor_ticks, minor=True)
     ax.axhline(0, color='0.6', linestyle='--', linewidth=1, zorder=1)
     ax.axhline(1, color='0.6', linestyle=':', linewidth=0.8, zorder=1)
     ax.axhline(-1, color='0.6', linestyle=':', linewidth=0.8, zorder=1)
 
     # Titles
     ax.set_title('The ML/MAP solution misfit', fontweight='normal')
-    ax.set_xlabel('Epicentral distance (km)')
-    ax.set_ylabel('Instrumental intensity misfits')
+    ax.set_ylabel('Instrumental intensity misfits\n(positive: obs > sim)')
+    if s_radius > 0.0:
+        ax.set_xlabel('Joyner-Boore distance (km)')
+    else:
+        ax.set_xlabel('Epicentral distance (km)')
 
     # Box formating
     ax.set_axisbelow(False)
     ax.spines['top'].set_visible(True)
     ax.spines['right'].set_visible(True)
-    ax.set_xlim(left=max(0.1, np.min(r0) * 0.8), right=np.max(r0) * 1.2)
+    if np.min(r0) > 10.0:
+        x_min = 10.0
+    else:
+        x_min = -0.5
+    if np.max(r0) < 10.0:
+        x_max = 10.0
+    else:
+        x_max = np.max(r0) * 1.2
+    ax.set_xlim(left=x_min, right=x_max)
     y_max = np.max(np.abs(i_misfit))
     ax.set_ylim(-y_max * 1.1, y_max * 1.1)
+
+    # Text info
+    if s_radius > 0.0:
+        source_text = f" Source with radius of {s_radius:3.1f} km"
+    else:
+        source_text = " Point source"
+    ax.text(x_min, y_max * 1.05, source_text, color='#333333',
+            va='top', ha='left', fontsize=10, family='monospace')
 
     plt.savefig(output_path, dpi=300, bbox_inches='tight')
     print(f"[+] SUCCESS: Saved to {output_path}")

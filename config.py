@@ -63,6 +63,7 @@ class ConfigClass:
     Attributes:
         ref_lon, ref_lat: Reference point coordinates [deg].
         h_top: Top depth of the rupture [km].
+        s_radius: Radius of the source [km].
         grid_x_set, grid_y_set, grid_z_set: Grid (start, step, end) [km].
         scale: Instrumental Seismic Intensity Scale (jma / mmi / ems98/ emsch).
         input_file: Path to the input data file.
@@ -70,6 +71,7 @@ class ConfigClass:
     ref_lon: float
     ref_lat: float
     h_top: float
+    s_radius: float
     grid_x_set: List[float]
     grid_y_set: List[float]
     grid_z_set: List[float]
@@ -91,13 +93,25 @@ class ConfigClass:
     def __post_init__(self):
         """Validates configuration parameters and ensures correct types."""
         # Check float constants
-        for field in ['ref_lon', 'ref_lat', 'h_top']:
+        for field in ['ref_lon', 'ref_lat', 'h_top', 's_radius']:
             value = getattr(self, field)
             if not isinstance(value, (int, float)):
                 print(f"[!] ERROR: {field} must be a number (float/int)")
                 print(f"    Got: {type(value).__name__} ('{value}')")
                 sys.exit(1)
             setattr(self, field, float(value))
+
+        # Validate h_top (> 0)
+        if self.h_top <= 0:
+            print("[!] ERROR: h_top must be greater than 0")
+            print(f"    Got: {self.h_top}")
+            sys.exit(1)
+
+        # Validate s_radius (>= 0)
+        if self.s_radius < 0:
+            print("[!] ERROR: s_radius must be greater than or equal to 0")
+            print(f"    Got: {self.s_radius}")
+            sys.exit(1)
 
         # Check grid search definitions: (start, step, end)
         for field in ['grid_x_set', 'grid_y_set', 'grid_z_set']:
@@ -151,6 +165,7 @@ INPUT = ConfigClass(
     ref_lon=135.6,  # [deg] Longitude
     ref_lat=35.1,   # [deg] Latitude
     h_top=3.0,      # [km] Top depth of the rupture
+    s_radius=0.0,   # [km] Radius of the source (assumed horizontal circle)
 
     # Grid search definitions: (start, step, end)
     grid_x_set=[-25.0, 0.1, 25.0],  # [km] Easting grid

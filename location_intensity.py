@@ -232,8 +232,8 @@ def forward_sed_intensity(
 def eval_log_L(
         x_src: float, y_src: float, mw_src: float,
         x_st: jnp.ndarray, y_st: jnp.ndarray, vs30_st: jnp.ndarray,
-        int_obs: jnp.ndarray, sig_obs: jnp.ndarray, h_top: float
-        ) -> jnp.ndarray:
+        int_obs: jnp.ndarray, sig_obs: jnp.ndarray, h_top: float,
+        s_radius: float) -> jnp.ndarray:
     """
     Evaluates the log-likelihood for a single grid point (hypothetical source).
 
@@ -247,11 +247,13 @@ def eval_log_L(
         int_obs (jnp.ndarray): Array of observed instrumental intensities.
         sig_obs (jnp.ndarray): Array of observational uncertainties (1 sigma).
         h_top (float): Top depth of the rupture [km].
+        s_radius (float): Radius of the source [km].
     Returns:
         jnp.ndarray: Scalar log-likelihood value for the given source.
     """
     # Distance from the rupture top to all station
-    r = jnp.sqrt((x_src - x_st)**2 + (y_src - y_st)**2)
+    r_true = jnp.sqrt((x_src - x_st)**2 + (y_src - y_st)**2)
+    r = jnp.maximum(r_true - s_radius, 0.0)
 
     # Forward problem (predict synthetic intensities)
     if INPUT.scale == ScaleType.JMA:  # Japan (JMA Shindo)
@@ -415,6 +417,7 @@ def main() -> None:
     gy = jnp.array(grid_y, dtype=jnp.float32)
     gz = jnp.array(grid_z, dtype=jnp.float32)
     h_top = jnp.array(INPUT.h_top, dtype=jnp.float32)
+    s_radius = jnp.array(INPUT.s_radius, dtype=jnp.float32)
 
     # Run memory check
     try:
@@ -429,8 +432,8 @@ def main() -> None:
         jax.vmap(
             jax.vmap(eval_log_L,
                      in_axes=(None, 0, None, None, None, None, None, None,
-                              None)),
-            in_axes=(0, None, None, None, None, None, None, None, None)
+                              None, None)),
+            in_axes=(0, None, None, None, None, None, None, None, None, None)
         ))
 
     # -------------------------------------------
@@ -444,7 +447,8 @@ def main() -> None:
     for i, mw_val in enumerate(gz):
         # Loop over Mw
         slice_2d = grid_search_2d(
-           gx, gy, mw_val, x_st, y_st, vs30_st, int_obs, sig_obs, h_top
+           gx, gy, mw_val, x_st, y_st, vs30_st, int_obs, sig_obs, h_top,
+           s_radius
            )
         # Transfer back to NumPy
         log_pdf_3d[:, :, i] = np.array(slice_2d.block_until_ready())
@@ -578,7 +582,8 @@ def main() -> None:
     mw_bes = loc_res[2]
 
     # Calculate distances from the best source to all stations [km]
-    r_bes = np.sqrt((loc_res[0] - x_st)**2 + (loc_res[1] - y_st)**2)
+    r_bes_true = np.sqrt((loc_res[0] - x_st)**2 + (loc_res[1] - y_st)**2)
+    r_bes = np.maximum(r_bes_true - s_radius, 0.0)
 
     # Compute synthetic intensities for all stations
     if INPUT.scale == ScaleType.JMA:  # Japan (JMA Shindo)
@@ -631,7 +636,8 @@ def main() -> None:
         y_st=data['y_km'].values,
         i_misfit=data['int_misfit'].values,
         i_colors=station_colors,
-        output_path=output_path
+        output_path=output_path,
+        s_radius=s_radius.item()
     )
 
     print("[*] SUCCESS: All done")
