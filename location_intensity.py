@@ -603,6 +603,62 @@ def main() -> None:
     data['int_misfit'] = np.array(int_misfit)
 
     # -------------------------------------------
+    # Evaluate and save PDF contours (experimental)
+    print("[*] Evaluate PDF contours for 95% and 68% confidence intervals")
+    try:
+        # Compute marginal PDF
+        xy_2d = np.sum(pdf_3d, axis=2).T  # Sum over Mw
+        # Compute levels for 95% and 68% confidence intervals
+        sort_xy = np.sort(xy_2d.ravel())[::-1]
+        cum_xy = np.cumsum(sort_xy)
+        levels_xy = [
+            sort_xy[np.searchsorted(cum_xy, 0.95)],
+            sort_xy[np.searchsorted(cum_xy, 0.68)],
+        ]
+
+        # Compute contour lines
+        all_contours = []
+        for level in levels_xy:
+            grad_y, grad_x = np.gradient((xy_2d >= level).astype(float))
+            igrad_y, igrad_x = np.where((grad_x != 0) | (grad_y != 0))
+            tmp_x, tmp_y = gx[igrad_x], gy[igrad_y]
+            if len(tmp_x) > 0:
+                listed = np.argsort(
+                    np.arctan2(tmp_y - tmp_y.mean(), tmp_x - tmp_x.mean())
+                )
+                tmp_x = tmp_x[listed]
+                tmp_y = tmp_y[listed]
+                step = max(1, len(tmp_x) // 200)
+                tmp_x = tmp_x[::step]
+                tmp_y = tmp_y[::step]
+                tmp_x = np.append(tmp_x, tmp_x[0])
+                tmp_y = np.append(tmp_y, tmp_y[0])
+                pts_wgs = []
+                for x, y in zip(tmp_x, tmp_y):
+                    tmp_wgs = back_to_wgs84([x, y, 0.0], data)[:2]
+                    pts_wgs.append(tmp_wgs)
+                pts_wgs = np.array(pts_wgs)
+                all_contours.append(pts_wgs[:, 0])  # Lat
+                all_contours.append(pts_wgs[:, 1])  # Lon
+            else:
+                all_contours.append(np.array([]))
+                all_contours.append(np.array([]))
+
+        # Save into text file
+        output_path = res_dir / f"{outfile}_contours.txt"
+        with open(output_path, 'w', encoding='utf-8') as f:
+            f.write("# CONTOURS FROM THE POSTERIOR MARGINAL PDF\n")
+            f.write(f"# {'-' * 68}\n")
+            f.write("# Lat(95%); Lon(95%); Lat(68%); Lon(68%)\n")
+            f.write(f"# {'-' * 68}\n")
+            for row in all_contours:
+                f.write(" ".join(f"{val:.6f}" for val in row) + "\n")
+        print(f"[+] SUCCESS: Contours saved to: {output_path}")
+
+    except Exception as e:
+        print(f"[!] WARNING: Could not compute or save contours: {e}")
+
+    # -------------------------------------------
     # Plot results
     print("[*] Plot results")
 

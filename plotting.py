@@ -169,7 +169,7 @@ def plot_marginal_pdf(pdf_3d: np.ndarray, gx: np.ndarray, gy: np.ndarray,
     xy_2d = np.sum(pdf_3d, axis=2).T  # Sum over Mw
     xz_2d = np.sum(pdf_3d, axis=1).T  # Sum over Northing
     yz_2d = np.sum(pdf_3d, axis=0)    # Sum over Easting
-    # Normalization of PDF to true density (dx*dy*dz)
+    # Normalization of PDF to relative density (0-1)
     xy_2d = xy_2d / np.max(xy_2d)
     xz_2d = xz_2d / np.max(xz_2d)
     yz_2d = yz_2d / np.max(yz_2d)
